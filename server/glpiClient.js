@@ -13,14 +13,20 @@ const withBase = (path) => {
 
 export async function initSession() {
 
-    // If userToken is "glpi" or a short string, it's likely a username/password, so use Basic auth
     const token = GLPI_CONFIG.userToken;
-    const authHeader = token.length < 30 ? `Basic ${Buffer.from(`${token}:${token}`).toString('base64')}` : `user_token ${token}`;
+    // Prefer API user_token auth.
+    // If userToken is short (fallback like 'glpi'), GLPI will reject it.
+    // In that case, try Basic auth with <token:token> as a fallback.
+    const authHeader = token && token.length >= 20
+      ? `user_token ${token}`
+      : `Basic ${Buffer.from(`${token}:${token}`).toString('base64')}`;
 
+    // App-Token optionnel : certains setups GLPI/versions n'attendent pas App-Token.
+    // Pour éviter ERROR_WRONG_APP_TOKEN_PARAMETER, on l'envoie uniquement si défini explicitement.
     const headers = {
         'Authorization': authHeader,
     };
-    if (GLPI_CONFIG.appToken && GLPI_CONFIG.appToken !== "none") {
+    if (process.env.GLPI_APP_TOKEN && GLPI_CONFIG.appToken && GLPI_CONFIG.appToken !== "none") {
         headers['App-Token'] = GLPI_CONFIG.appToken;
     }
 
@@ -64,7 +70,9 @@ export async function glpiRequest({ sessionToken, method, path, body, query }) {
 
     const headers = {
         'Session-Token': sessionToken,
-        'App-Token': GLPI_CONFIG.appToken,
+    };
+    if (GLPI_CONFIG.appToken && GLPI_CONFIG.appToken !== "none") {
+        headers['App-Token'] = GLPI_CONFIG.appToken;
     };
 
     let payload;

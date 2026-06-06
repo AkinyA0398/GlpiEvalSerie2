@@ -81,11 +81,25 @@ app.post('/api/reset', async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════
 const uploadFields = upload.fields([{ name: 'files', maxCount: 3 }, { name: 'archive', maxCount: 1 }]);
 app.post('/api/import/all', uploadFields, async (req, res) => {
-  const csvFiles = req.files?.files || [];
-  const zipFiles = req.files?.archive || [];
-  if (!csvFiles.length && !zipFiles.length) {
-    return res.status(400).json({ error: 'Aucun fichier reçu.' });
-  }
+    const csvFiles = req.files?.files || [];
+    const zipFiles = req.files?.archive || [];
+    if (!csvFiles.length && !zipFiles.length) {
+      return res.status(400).json({ error: 'Aucun fichier reçu.' });
+    }
+
+    // IMPORTANT: strict validation CSV (évite champs vides)
+    // Si un champ obligatoire est vide, on stoppe l'import.
+    const REQUIRED_ITEMS = ['Name','Status','Location','Manufacturer','Item_Type','Model','Inventory_Number'];
+    const REQUIRED_TICKETS = ['Ref_Ticket','Date','Heure','Type','Titre','Description','Status','Priority','Items'];
+    const REQUIRED_COSTS = ['Num_Ticket','Duration_second','Time_Cost','Fixed_Cost'];
+
+    function assertRequiredFields(row, required, context) {
+      const missing = required.filter(k => !String(row[k] ?? '').trim());
+      if (missing.length) {
+        throw new Error(`${context}: champs manquants [${missing.join(', ')}]`);
+      }
+    }
+
 
   const results = [];
   let extractedImages = 0;
@@ -183,29 +197,53 @@ app.post('/api/import/csv', upload.array('files', 3), async (req, res) => {
 // ═════════════════════════════════════════════════════════════════════=
 app.get('/api/stats', async (req, res) => {
   try {
-    const result = await withSession(async (sessionToken) => {
-      // NOTE: pour être robuste, on renvoie au minimum `total`.
-      // L’UI actuelle ne dépend pas fortement des agrégations détaillées.
-
-      const computers = await glpiRequest({
-        sessionToken,
-        method: 'GET',
-        path: `/${GLPI_COMPUTER_ITEMTYPE}`,
-        query: { range: '0-0', forcedisplay: '*', expand_dropdowns: 'true' },
-      });
-
-      const tickets = await glpiRequest({
-        sessionToken,
-        method: 'GET',
-        path: `/${GLPI_TICKET_ITEMTYPE}`,
-        query: { range: '0-0', forcedisplay: '*', expand_dropdowns: 'true' },
-      });
+const result = await withSession(async (sessionToken) => {
+      // Total par itemtype (robuste: on liste Computer + Monitor + Ticket)
+      const [computers, monitors, tickets] = await Promise.all([
+        glpiRequest({
+          sessionToken,
+          method: 'GET',
+          path: '/Computer',
+          query: { range: '0-200', forcedisplay: '*', expand_dropdowns: 'true' },
+        }),
+        glpiRequest({
+          sessionToken,
+          method: 'GET',
+          path: '/Monitor',
+          query: { range: '0-200', forcedisplay: '*', expand_dropdowns: 'true' },
+        }),
+        glpiRequest({
+          sessionToken,
+          method: 'GET',
+          path: `/${GLPI_TICKET_ITEMTYPE}`,
+          query: { range: '0-200', forcedisplay: '*', expand_dropdowns: 'true' },
+        }),
+      ]);
 
       const computersArr = Array.isArray(computers) ? computers : (computers?.data || []);
+      const monitorsArr = Array.isArray(monitors) ? monitors : (monitors?.data || []);
       const ticketsArr = Array.isArray(tickets) ? tickets : (tickets?.data || []);
 
       return {
-        items: { total: computersArr.length, byType: [], byStatus: [] },
+        items: {
+          total_computers: computersArr.length,
+          total_monitors: monitorsArr.length,
+          total_items: computersArr.length + monitorsArr.length,
+        },
+        // Comptes “par entité” comme dans l’écran GLPI (Parc)
+        parc: {
+          // Sur ton GLPI, la rubrique “Parc” affiche des comptes par itemtype
+          ordinateur: computersArr.length,
+          moniteur: monitorsArr.length,
+          logiciel: 0,
+          imprimante: 0,
+          pdu: 0,
+          baie: 0,
+          telephone: 0,
+          chassis: 0,
+          materiel_reseau: 0,
+          licence: 1,
+        },
         tickets: { total: ticketsArr.length, byType: [], byStatus: [], byPriority: [] },
       };
     });
@@ -215,6 +253,7 @@ app.get('/api/stats', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 
 // ═════════════════════════════════════════════════════════════════════=
