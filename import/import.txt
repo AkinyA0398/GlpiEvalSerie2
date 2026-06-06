@@ -1,0 +1,9 @@
+group(Location): name
+manufacturer(fabricant):name
+status:name
+user:name
+model:string
+ordinateur
+
+ticket:
+cout:
