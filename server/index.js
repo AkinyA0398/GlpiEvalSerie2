@@ -113,8 +113,6 @@ app.post('/api/import/all', uploadFields, async (req, res) => {
     throw new Error(`${context} — fichier "${fileName}", ligne ${lineNumber}: champs manquants [${missing.join(', ')}]`);
   }
 
-
-
   const results = [];
   let extractedImages = 0;
 
@@ -404,32 +402,20 @@ app.get('/api/stats', async (req, res) => {
         ).trim();
 
         if (!raw || raw === '—') return '—';
-<<<<<<< Updated upstream
-        // normalisation simple (minuscules, accents ignorés)
-=======
 
->>>>>>> Stashed changes
         const n = raw
           .toLowerCase()
           .normalize('NFD')
           .replace(/\p{Diacritic}/gu, '')
           .trim();
 
-<<<<<<< Updated upstream
-        // Correspondances robustes
         if (n.includes('panne')) return 'En panne';
         if (n.includes('production')) return 'En production';
-        // Maintenance / Stock éventuels
-=======
-        if (n.includes('panne')) return 'En panne';
-        if (n.includes('production')) return 'En production';
->>>>>>> Stashed changes
         if (n.includes('maintenance')) return 'Maintenance';
         if (n.includes('stock')) return 'En stock';
 
         return raw;
       };
-
 
       const itemsByStatusFixed = (() => {
         const m = new Map();
