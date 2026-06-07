@@ -383,9 +383,12 @@ app.get('/api/stats', async (req, res) => {
       ).map(([priority, count]) => ({ priority, count }));
 
       // IMPORTANT: GLPI peut renvoyer le statut sous des clés différentes.
-      // On applique le même mapping que /api/items.
+      // On veut surtout un mapping stable vers les libellés utilisés par l'app:
+      //   - "En production"
+      //   - "En panne"
+      //   - (optionnel) autres statuts: on renvoie la valeur brute si non match.
       const getStatusForStats = (x) => {
-        const v = String(
+        const raw = String(
           x?.status?.name ||
           x?.state?.name ||
           x?.states?.[0]?.name ||
@@ -399,8 +402,25 @@ app.get('/api/stats', async (req, res) => {
           x?.states ||
           ''
         ).trim();
-        return v || '—';
+
+        if (!raw || raw === '—') return '—';
+        // normalisation simple (minuscules, accents ignorés)
+        const n = raw
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/\p{Diacritic}/gu, '')
+          .trim();
+
+        // Correspondances robustes
+        if (n.includes('panne')) return 'En panne';
+        if (n.includes('production')) return 'En production';
+        // Maintenance / Stock éventuels
+        if (n.includes('maintenance')) return 'Maintenance';
+        if (n.includes('stock')) return 'En stock';
+
+        return raw;
       };
+
 
       const itemsByStatusFixed = (() => {
         const m = new Map();

@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+
 import { fetchItems, fetchItemFilters, fetchItem } from '../services/api';
 
 
@@ -39,23 +40,68 @@ export const ElementsPage: React.FC = () => {
   }, []);
 
 
-  const search = useCallback(() => {
-    setLoading(true);
+  // Abort d’une requête précédente (anti “réponses en retard”)
+  const abortRef = useRef<AbortController | null>(null);
+
+
+  const runSearch = useCallback((next?: { force?: boolean }) => {
     const p: Record<string, string> = {};
     if (q) p.q = q;
     if (selType) p.type = selType;
     if (selStatus) p.status = selStatus;
     if (selLocation) p.location = selLocation;
     if (selManu) p.manufacturer = selManu;
-    fetchItems(p).then(setItems).finally(() => setLoading(false));
+
+    // Si rien à rechercher, on charge quand même la liste complète
+    if (!next?.force && !q && !selType && !selStatus && !selLocation && !selManu) {
+      // Continuer quand même pour être cohérent (on évite juste un double trigger)
+    }
+
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    setLoading(true);
+    fetchItems(p, { signal: controller.signal })
+      .then(setItems)
+      .catch((err) => {
+        if (String(err?.name) !== 'AbortError') console.error(err);
+      })
+      .finally(() => {
+        // Éviter de casser si une requête a été annulée
+        if (!controller.signal.aborted) setLoading(false);
+      });
   }, [q, selType, selStatus, selLocation, selManu]);
+
+  const search = useCallback(() => {
+    runSearch({ force: true });
+  }, [runSearch]);
+
+  // Debounce pour la recherche en live
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      runSearch();
+    }, 350);
+
+    return () => {
+      window.clearTimeout(t);
+    };
+  }, [q, selType, selStatus, selLocation, selManu, runSearch]);
+
 
 
 
 
   const handleReset = () => {
-    setQ(''); setSelType(''); setSelStatus(''); setSelLocation(''); setSelManu('');
+    setQ('');
+    setSelType('');
+    setSelStatus('');
+    setSelLocation('');
+    setSelManu('');
+    // recharger la liste complète tout de suite
+    runSearch({ force: true });
   };
+
 
   // ── Détails item (overlay) ───────────────────────────────
   const [selectedItem, setSelectedItem] = useState<null | Record<string, unknown>>(null);
@@ -95,7 +141,10 @@ export const ElementsPage: React.FC = () => {
             onKeyDown={e => e.key === 'Enter' && search()}
             className="front-search-input"
           />
-          <button className="front-search-btn" onClick={search} id="btn-search">Rechercher</button>
+          <button className="front-search-btn" onClick={search} id="btn-search" disabled={loading}>
+            {loading ? 'Recherche…' : 'Rechercher'}
+          </button>
+
         </div>
 
         <div className="front-selects">

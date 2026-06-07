@@ -1,12 +1,16 @@
 const BASE = '/api';
 
 // ── Items ──────────────────────────────────────────────────────────────────
-export const fetchItems = async (filters: Record<string, string> = {}) => {
+export const fetchItems = async (
+  filters: Record<string, string> = {},
+  opts?: { signal?: AbortSignal },
+) => {
   const params = new URLSearchParams(filters);
-  const res = await fetch(`${BASE}/items?${params}`);
+  const res = await fetch(`${BASE}/items?${params}`, { signal: opts?.signal });
   if (!res.ok) throw new Error('Erreur chargement éléments');
   return res.json();
 };
+
 
 export const fetchItemFilters = async () => {
   const res = await fetch(`${BASE}/items/filters`);
