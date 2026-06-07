@@ -9,7 +9,7 @@ export const BackofficeLayout: React.FC = () => {
 
   const handleLogout = () => {
     setLoggingOut(true);
-    setTimeout(() => { logout(); navigate('/login'); }, 400);
+    setTimeout(() => { logout(); navigate('/login', { state: { from: { pathname: '/login' } } }); }, 400);
   };
 
   return (

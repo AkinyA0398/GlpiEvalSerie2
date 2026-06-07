@@ -1,0 +1,4 @@
+To implement item details:
+- Add GET /api/items/:id in server/index.js
+- Proxy to GLPI Computer and Monitor endpoints, then normalize fields.
+

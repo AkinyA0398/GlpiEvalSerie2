@@ -14,6 +14,14 @@ export const fetchItemFilters = async () => {
   return res.json();
 };
 
+// ── Item detail ─────────────────────────────────────────────────────────
+export const fetchItem = async (id: number | string) => {
+  const res = await fetch(`${BASE}/items/${id}`);
+  if (!res.ok) throw new Error('Erreur chargement détail item');
+  return res.json();
+};
+
+
 // ── Tickets ────────────────────────────────────────────────────────────────
 export const fetchTickets = async (filters: Record<string, string> = {}) => {
   const params = new URLSearchParams(filters);
@@ -63,6 +71,6 @@ export const importAll = async (csvFiles: File[], zipFile?: File | null) => {
     fd.append('archive', zipFile);
   }
   const res = await fetch(`${BASE}/import/all`, { method: 'POST', body: fd });
-  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error || 'Erreur import unifié'); }
+  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Erreur import unifié'); }
   return res.json();
 };

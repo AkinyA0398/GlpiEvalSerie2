@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { fetchItems, fetchItemFilters } from '../services/api';
+import { fetchItems, fetchItemFilters, fetchItem } from '../services/api';
+
 
 interface Item {
   id: number; name: string; status: string; location: string;
@@ -7,8 +8,8 @@ interface Item {
   inventory_number: string; user_name: string;
 }
 
-const STATUS_COLOR: Record<string,string> = {
-  'En production':'#22c55e','Maintenance':'#f59e0b','En panne':'#ef4444','En stock':'#6366f1',
+const STATUS_COLOR: Record<string, string> = {
+  'En production': '#22c55e', 'Maintenance': '#f59e0b', 'En panne': '#ef4444', 'En stock': '#6366f1',
 };
 
 function StatusDot({ status }: { status: string }) {
@@ -17,38 +18,58 @@ function StatusDot({ status }: { status: string }) {
 }
 
 export const ElementsPage: React.FC = () => {
-  const [items,   setItems]   = useState<Item[]>([]);
-  const [filters, setFilters] = useState<{ types:string[]; statuses:string[]; locations:string[]; manufacturers:string[] }>
-    ({ types:[], statuses:[], locations:[], manufacturers:[] });
+  const [items, setItems] = useState<Item[]>([]);
+  const [filters, setFilters] = useState<{ types: string[]; statuses: string[]; locations: string[]; manufacturers: string[] }>
+    ({ types: [], statuses: [], locations: [], manufacturers: [] });
   const [loading, setLoading] = useState(true);
 
-  const [q,            setQ]            = useState('');
-  const [selType,      setSelType]      = useState('');
-  const [selStatus,    setSelStatus]    = useState('');
-  const [selLocation,  setSelLocation]  = useState('');
-  const [selManu,      setSelManu]      = useState('');
+  const [q, setQ] = useState('');
+  const [selType, setSelType] = useState('');
+  const [selStatus, setSelStatus] = useState('');
+  const [selLocation, setSelLocation] = useState('');
+  const [selManu, setSelManu] = useState('');
 
-  // Charger les valeurs de filtre au montage
+  // Charger les valeurs de filtre + les items au montage
   useEffect(() => {
     fetchItemFilters().then(setFilters).catch(console.error);
+    fetchItems({})
+      .then(setItems)
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
+
 
   const search = useCallback(() => {
     setLoading(true);
-    const p: Record<string,string> = {};
-    if (q)          p.q = q;
-    if (selType)    p.type = selType;
-    if (selStatus)  p.status = selStatus;
+    const p: Record<string, string> = {};
+    if (q) p.q = q;
+    if (selType) p.type = selType;
+    if (selStatus) p.status = selStatus;
     if (selLocation) p.location = selLocation;
-    if (selManu)    p.manufacturer = selManu;
+    if (selManu) p.manufacturer = selManu;
     fetchItems(p).then(setItems).finally(() => setLoading(false));
   }, [q, selType, selStatus, selLocation, selManu]);
 
-  useEffect(() => { search(); }, [selType, selStatus, selLocation, selManu]);
+
+
 
   const handleReset = () => {
     setQ(''); setSelType(''); setSelStatus(''); setSelLocation(''); setSelManu('');
   };
+
+  // ── Détails item (overlay) ───────────────────────────────
+  const [selectedItem, setSelectedItem] = useState<null | Record<string, unknown>>(null);
+  const fetchItemDetail = async (id: number) => {
+    try {
+      const d = await fetchItem(id);
+      setSelectedItem(d);
+    } catch {
+      // on ignore pour le moment
+    }
+
+  };
+
+
 
   return (
     <div className="front-page">
@@ -63,7 +84,7 @@ export const ElementsPage: React.FC = () => {
       <div className="front-filter-bar">
         <div className="front-search-wrap">
           <svg className="front-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
           </svg>
           <input
             id="input-search-elements"
@@ -108,24 +129,41 @@ export const ElementsPage: React.FC = () => {
       ) : (
         <div className="items-grid">
           {items.map(item => (
-            <div key={item.id} className="item-card" id={`item-${item.id}`}>
+            <div
+              key={item.id}
+              className="item-card"
+              id={`item-${item.id}`}
+              role="button"
+              tabIndex={0}
+              onClick={() => fetchItemDetail(item.id)}
+              onKeyDown={(e) => e.key === 'Enter' && fetchItemDetail(item.id)}
+            >
+
               <div className="item-card-top">
                 <div className="item-type-chip">{item.item_type || '—'}</div>
                 <StatusDot status={item.status} />
               </div>
               <div className="item-name">{item.name}</div>
               <div className="item-model">{item.manufacturer} — {item.model}</div>
+
+              {/* petite debug/overlay basique: évite “unused state” */}
+              {selectedItem && String(selectedItem?.id) === String(item.id) && (
+                <div className="item-detail-mini" aria-label="Détail">
+                  {String(selectedItem?.inventory_number ?? '—')}
+                </div>
+              )}
+
               <div className="item-details">
                 <div className="item-detail-row">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
                   {item.location || '—'}
                 </div>
                 <div className="item-detail-row">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                   {item.user_name || 'Non assigné'}
                 </div>
                 <div className="item-detail-row">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-4 0v2" /></svg>
                   {item.inventory_number || '—'}
                 </div>
               </div>

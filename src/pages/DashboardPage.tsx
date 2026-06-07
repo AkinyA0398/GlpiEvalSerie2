@@ -43,10 +43,21 @@ export const DashboardPage: React.FC = () => {
   if (error)   return <div className="bo-page"><div className="bo-alert alert-error">❌ {error}</div></div>;
   if (!stats)  return null;
 
-  const maxItemType   = Math.max(...stats.items.byType.map(r => r.count),   1);
-  const maxItemStatus = Math.max(...stats.items.byStatus.map(r => r.count), 1);
-  const maxTktType    = Math.max(...stats.tickets.byType.map(r => r.count), 1);
-  const maxTktStatus  = Math.max(...stats.tickets.byStatus.map(r => r.count), 1);
+  const itemsByType = stats.items.byType ?? [];
+  const itemsByStatus = stats.items.byStatus ?? [];
+  const ticketsByType = stats.tickets.byType ?? [];
+  const ticketsByStatus = stats.tickets.byStatus ?? [];
+  const ticketsByPriority = stats.tickets.byPriority ?? [];
+
+
+
+
+
+  const maxItemType   = Math.max(...itemsByType.map(r => r.count),   1);
+  const maxItemStatus = Math.max(...itemsByStatus.map(r => r.count), 1);
+  const maxTktType    = Math.max(...ticketsByType.map(r => r.count), 1);
+  const maxTktStatus  = Math.max(...ticketsByStatus.map(r => r.count), 1);
+
 
   return (
     <div className="bo-page">
@@ -67,6 +78,8 @@ export const DashboardPage: React.FC = () => {
           </div>
           <div>
             <div className="dash-kpi-num">{stats.items.total}</div>
+
+
             <div className="dash-kpi-label">Éléments total</div>
           </div>
         </div>
@@ -90,7 +103,8 @@ export const DashboardPage: React.FC = () => {
           </div>
           <div>
             <div className="dash-kpi-num">
-              {stats.items.byStatus.find(s => s.status === 'En production')?.count ?? 0}
+              {itemsByStatus.find(s => s.status === 'En production')?.count ?? 0}
+
             </div>
             <div className="dash-kpi-label">En production</div>
           </div>
@@ -104,7 +118,8 @@ export const DashboardPage: React.FC = () => {
           </div>
           <div>
             <div className="dash-kpi-num">
-              {stats.items.byStatus.find(s => s.status === 'En panne')?.count ?? 0}
+              {itemsByStatus.find(s => s.status === 'En panne')?.count ?? 0}
+
             </div>
             <div className="dash-kpi-label">En panne</div>
           </div>
@@ -117,19 +132,21 @@ export const DashboardPage: React.FC = () => {
         <div className="bo-card">
           <h2 className="bo-card-title">Par type</h2>
           <div className="bar-list">
-            {stats.items.byType.map(r => (
+            {itemsByType.map(r => (
               <BarGroup key={r.item_type} label={r.item_type || '—'} value={r.count} max={maxItemType} />
             ))}
-            {!stats.items.byType.length && <p className="dash-empty">Aucune donnée</p>}
+            {!itemsByType.length && <p className="dash-empty">Aucune donnée</p>}
+
           </div>
         </div>
         <div className="bo-card">
           <h2 className="bo-card-title">Par statut</h2>
           <div className="bar-list">
-            {stats.items.byStatus.map(r => (
+            {itemsByStatus.map(r => (
               <BarGroup key={r.status} label={r.status || '—'} value={r.count} max={maxItemStatus} color={STATUS_COLOR[r.status]} />
             ))}
-            {!stats.items.byStatus.length && <p className="dash-empty">Aucune donnée</p>}
+            {!itemsByStatus.length && <p className="dash-empty">Aucune donnée</p>}
+
           </div>
         </div>
       </div>
@@ -140,28 +157,31 @@ export const DashboardPage: React.FC = () => {
         <div className="bo-card">
           <h2 className="bo-card-title">Par type</h2>
           <div className="bar-list">
-            {stats.tickets.byType.map(r => (
+            {ticketsByType.map(r => (
               <BarGroup key={r.ticket_type} label={r.ticket_type || '—'} value={r.count} max={maxTktType} />
             ))}
-            {!stats.tickets.byType.length && <p className="dash-empty">Aucune donnée</p>}
+            {!ticketsByType.length && <p className="dash-empty">Aucune donnée</p>}
+
           </div>
         </div>
         <div className="bo-card">
           <h2 className="bo-card-title">Par statut</h2>
           <div className="bar-list">
-            {stats.tickets.byStatus.map(r => (
+            {ticketsByStatus.map(r => (
               <BarGroup key={r.status} label={r.status || '—'} value={r.count} max={maxTktStatus} color={STATUS_COLOR[r.status]} />
             ))}
-            {!stats.tickets.byStatus.length && <p className="dash-empty">Aucune donnée</p>}
+            {!ticketsByStatus.length && <p className="dash-empty">Aucune donnée</p>}
+
           </div>
         </div>
         <div className="bo-card">
           <h2 className="bo-card-title">Par priorité</h2>
           <div className="bar-list">
-            {stats.tickets.byPriority.map(r => (
+            {ticketsByPriority.map(r => (
               <BarGroup key={r.priority} label={r.priority || '—'} value={r.count} max={stats.tickets.total} color={PRIO_COLOR[r.priority]} />
             ))}
-            {!stats.tickets.byPriority.length && <p className="dash-empty">Aucune donnée</p>}
+            {!ticketsByPriority.length && <p className="dash-empty">Aucune donnée</p>}
+
           </div>
         </div>
       </div>
