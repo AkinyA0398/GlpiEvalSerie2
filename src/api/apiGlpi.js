@@ -47,7 +47,7 @@ export const apiGlpi = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(url, config);
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Erreur ${response.status}: ${errorText}`);

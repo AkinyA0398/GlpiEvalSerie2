@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { deleteUser, getGlpiUsers } from '../services/testApi'; // Ajuste le chemin
+import { useState, useEffect } from 'react';
+import { getGlpiUsers } from '../services/testApi'; // Ajuste le chemin
 
 const TestUsers = () => {
   const [users, setUsers] = useState([]);

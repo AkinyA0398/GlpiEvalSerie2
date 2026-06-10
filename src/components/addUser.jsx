@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { addUser } from '../services/testApi';
 import './AddUser.css';
 import { useNavigate } from 'react-router-dom';
 const AddUser = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     realname: '',
@@ -21,7 +22,6 @@ const AddUser = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const navigate = useNavigate();
     try {
       const res = await addUser({
         formdata: formData

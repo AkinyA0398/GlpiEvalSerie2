@@ -1,9 +1,8 @@
 // components/Home.js (ou le nom de ton choix)
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import { initGlpiSession } from '../api/apiGlpi'; 
-import { createGlpiCustomStatus, createGlpiStatus } from '../services/CrudService';
-import GlpiReset from './GlpiReset';
+
 const Home = () => {
   const navigate = useNavigate();
    
@@ -37,9 +36,9 @@ const Home = () => {
 };
 
 const styles = {
-  container: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontFamily: 'Arial' },
-  loginBox: { padding: '20px', border: '1px solid #ccc', borderRadius: '5px', textAlign: 'center' },
-  button: { padding: '10px 20px', backgroundColor: '#007BFF', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }
+  container: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontFamily: 'Arial', backgroundColor: '#f1f5f9', color: '#0f172a' },
+  loginBox: { padding: '20px', border: '1px solid #e2e8f0', borderRadius: '5px', textAlign: 'center', backgroundColor: '#ffffff', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' },
+  button: { padding: '10px 20px', backgroundImage: 'linear-gradient(135deg, #0072ff 0%, #00c6ff 100%)', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer', margin: '5px', boxShadow: '0 4px 6px -1px rgba(0, 114, 255, 0.2)' }
 };
 
 export default Home;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { fetchGlpiItems, fetchGlpiTickets } from '../services/CrudService';
 
 const GlpiDashboard = () => {
@@ -15,9 +15,7 @@ const GlpiDashboard = () => {
     byType: { Incident: 0, Request: 0 }
   });
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
+
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -81,6 +79,13 @@ const GlpiDashboard = () => {
     }
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadDashboardData();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
@@ -98,10 +103,10 @@ const GlpiDashboard = () => {
   }
 
   const itemTypeConfig = {
-    Computer: { label: 'Ordinateurs', color: '#00d2ff' },
-    Monitor: { label: 'Ecrans', color: '#38bdf8' },
-    NetworkEquipment: { label: 'Materiels Reseau', color: '#0ea5e9' },
-    Peripheral: { label: 'Peripheriques', color: '#0284c7' }
+    Computer: { label: 'Ordinateurs', gradient: 'linear-gradient(90deg, #0072ff, #00c6ff)' },
+    Monitor: { label: 'Ecrans', gradient: 'linear-gradient(90deg, #38bdf8, #7dd3fc)' },
+    NetworkEquipment: { label: 'Materiels Reseau', gradient: 'linear-gradient(90deg, #0ea5e9, #38bdf8)' },
+    Peripheral: { label: 'Peripheriques', gradient: 'linear-gradient(90deg, #0284c7, #0ea5e9)' }
   };
 
   return (
@@ -162,7 +167,7 @@ const GlpiDashboard = () => {
                   </div>
                   {/* Conteneur de barre de progression macro */}
                   <div style={styles.progressBarBg}>
-                    <div style={{ ...styles.progressBarFill, width: `${percentage}%`, backgroundColor: config.color }} />
+                    <div style={{ ...styles.progressBarFill, width: `${percentage}%`, background: config.gradient }} />
                   </div>
                 </div>
               );
@@ -203,41 +208,41 @@ const GlpiDashboard = () => {
 };
 
 const styles = {
-  page: { backgroundColor: '#121212', color: '#f8fafc', fontFamily: 'system-ui, -apple-system, sans-serif' },
-  loadingContainer: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px', backgroundColor: '#121212' },
-  loadingText: { color: '#00d2ff', fontSize: '14px', fontFamily: 'monospace' },
-  errorContainer: { padding: '24px', backgroundColor: '#1e1e1e', borderRadius: '8px', border: '1px solid #ef4444' },
-  errorText: { color: '#ef4444', fontSize: '14px', margin: 0 },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px', borderBottom: '1px solid #334155', paddingBottom: '20px', marginBottom: '32px' },
-  mainTitle: { fontSize: '24px', fontWeight: '700', color: '#00d2ff', margin: '0 0 6px 0' },
-  subtitle: { fontSize: '13px', color: '#cbd5e1', margin: 0 },
-  refreshBtn: { backgroundColor: 'transparent', border: '1px solid #334155', color: '#00d2ff', padding: '10px 18px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', transition: 'all 0.2s' },
+  page: { backgroundColor: '#f1f5f9', color: '#0f172a', fontFamily: 'system-ui, -apple-system, sans-serif' },
+  loadingContainer: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px', backgroundColor: '#f1f5f9' },
+  loadingText: { color: '#0072ff', fontSize: '14px', fontFamily: 'monospace' },
+  errorContainer: { padding: '24px', backgroundColor: '#fee2e2', borderRadius: '8px', border: '1px solid #ef4444', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' },
+  errorText: { color: '#dc2626', fontSize: '14px', margin: 0 },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '20px', marginBottom: '32px' },
+  mainTitle: { fontSize: '24px', fontWeight: '700', color: '#0072ff', margin: '0 0 6px 0' },
+  subtitle: { fontSize: '13px', color: '#64748b', margin: 0 },
+  refreshBtn: { backgroundImage: 'linear-gradient(135deg, #0072ff 0%, #00c6ff 100%)', border: 'none', color: '#ffffff', padding: '10px 18px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', transition: 'all 0.2s', boxShadow: '0 4px 6px -1px rgba(0, 114, 255, 0.2)' },
   kpiGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '32px' },
-  kpiCard: { backgroundColor: '#1e1e1e', border: '1px solid #334155', borderRadius: '8px', padding: '24px' },
-  kpiLabel: { fontSize: '12px', fontWeight: '600', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.5px' },
+  kpiCard: { backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' },
+  kpiLabel: { fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' },
   kpiValueRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: '14px' },
-  kpiNumber: { fontSize: '38px', fontWeight: '800', color: '#f8fafc' },
-  kpiBadge: { fontSize: '11px', fontWeight: '700', color: '#00d2ff', backgroundColor: 'rgba(0, 210, 255, 0.08)', border: '1px solid #00d2ff', padding: '4px 8px', borderRadius: '4px', textTransform: 'uppercase' },
+  kpiNumber: { fontSize: '38px', fontWeight: '800', color: '#0f172a' },
+  kpiBadge: { fontSize: '11px', fontWeight: '700', color: '#0072ff', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', padding: '4px 8px', borderRadius: '4px', textTransform: 'uppercase' },
   detailsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '24px' },
-  contentCard: { backgroundColor: '#1e1e1e', border: '1px solid #334155', borderRadius: '8px', padding: '24px' },
-  cardTitle: { margin: '0 0 20px 0', fontSize: '16px', fontWeight: '700', color: '#cbd5e1', borderBottom: '1px solid #334155', paddingBottom: '12px' },
+  contentCard: { backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' },
+  cardTitle: { margin: '0 0 20px 0', fontSize: '16px', fontWeight: '700', color: '#334155', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' },
   itemDistributionList: { display: 'flex', flexDirection: 'column', gap: '18px' },
   distributionRow: { display: 'flex', flexDirection: 'column', gap: '8px' },
-  rowMetadata: { display: 'flex', justifycontent: 'space-between', display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' },
-  rowLabel: { color: '#cbd5e1' },
-  rowValue: { color: '#f8fafc' },
-  rowPercentage: { fontWeight: '400', color: '#64748b', fontSize: '12px', marginLeft: '4px' },
-  progressBarBg: { width: '100%', height: '6px', backgroundColor: '#121212', borderRadius: '3px', overflow: 'hidden', border: '1px solid #334155' },
+  rowMetadata: { display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' },
+  rowLabel: { color: '#475569' },
+  rowValue: { color: '#0f172a' },
+  rowPercentage: { fontWeight: '400', color: '#94a3b8', fontSize: '12px', marginLeft: '4px' },
+  progressBarBg: { width: '100%', height: '6px', backgroundColor: '#f1f5f9', borderRadius: '3px', overflow: 'hidden', border: '1px solid #e2e8f0' },
   progressBarFill: { height: '100%', borderRadius: '3px' },
   ticketTypeContainer: { display: 'flex', flexDirection: 'column', gap: '16px' },
-  ticketRowIncident: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', backgroundColor: 'rgba(239, 68, 68, 0.02)', borderRadius: '6px', border: '1px solid rgba(239, 68, 68, 0.2)' },
+  ticketRowIncident: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', backgroundColor: '#fef2f2', borderRadius: '6px', border: '1px solid #fecaca' },
   ticketMeta: { display: 'flex', flexDirection: 'column', gap: '4px' },
-  ticketMainLabel: { fontWeight: '700', color: '#ef4444', fontSize: '14px' },
-  ticketSubLabel: { fontSize: '12px', color: '#cbd5e1' },
-  ticketCounterIncident: { fontSize: '26px', fontWeight: '800', color: '#ef4444' },
-  ticketRowRequest: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', backgroundColor: 'rgba(0, 210, 255, 0.02)', borderRadius: '6px', border: '1px solid rgba(0, 210, 255, 0.2)' },
-  ticketMainLabelRequest: { fontWeight: '700', color: '#00d2ff', fontSize: '14px' },
-  ticketCounterRequest: { fontSize: '26px', fontWeight: '800', color: '#00d2ff' }
+  ticketMainLabel: { fontWeight: '700', color: '#dc2626', fontSize: '14px' },
+  ticketSubLabel: { fontSize: '12px', color: '#64748b' },
+  ticketCounterIncident: { fontSize: '26px', fontWeight: '800', color: '#dc2626' },
+  ticketRowRequest: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', backgroundColor: '#f0f9ff', borderRadius: '6px', border: '1px solid #bae6fd' },
+  ticketMainLabelRequest: { fontWeight: '700', color: '#0284c7', fontSize: '14px' },
+  ticketCounterRequest: { fontSize: '26px', fontWeight: '800', color: '#0284c7' }
 };
 
 export default GlpiDashboard;

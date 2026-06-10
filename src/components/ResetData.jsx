@@ -1,4 +1,4 @@
-import React from 'react';
+
 import GlpiReset from './GlpiReset';
 
 const ResetData = () => {
@@ -30,18 +30,18 @@ const styles = {
   page: {
     minHeight: 'calc(100vh - 60px)',
     padding: '28px 18px',
-    background: 'linear-gradient(180deg, #121212 0%, #1e1e1e 100%)',
+    backgroundColor: '#f1f5f9',
     fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
-    color: '#f8fafc'
+    color: '#0f172a'
   },
   card: {
     maxWidth: '980px',
     margin: '0 auto',
-    background: '#121212',
-    border: '1px solid #334155',
+    backgroundColor: '#ffffff',
+    border: '1px solid #e2e8f0',
     borderRadius: '12px',
     padding: '22px',
-    boxShadow: '0 10px 30px rgba(0,0,0,0.35)'
+    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
   },
   titleRow: {
     display: 'flex',
@@ -53,23 +53,23 @@ const styles = {
   title: {
     fontSize: '20px',
     fontWeight: 800,
-    color: '#00d2ff' // Accent bleu ciel professionnel appliqué au titre principal
+    color: '#0072ff' 
   },
   subtitle: {
     marginTop: 6,
     fontSize: '13px',
-    color: '#cbd5e1'
+    color: '#64748b'
   },
   confirmBox: {
-    border: '1px dashed #334155',
+    border: '1px dashed #cbd5e1',
     borderRadius: '10px',
     padding: '16px',
     marginBottom: '14px',
-    background: 'rgba(56, 189, 248, 0.02)'
+    backgroundColor: '#f8fafc'
   },
   confirmText: {
     fontSize: '14px',
-    color: '#cbd5e1',
+    color: '#475569',
     lineHeight: 1.5
   },
   actionWrap: {

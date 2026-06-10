@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   getGlpiItems, deleteGlpiItem,
   getGlpiModels, deleteGlpiModel,
@@ -104,7 +104,7 @@ const GlpiReset = () => {
 
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '600px', margin: '0 auto' }}>
-      <div style={{ border: '1px solid #ffcccb', backgroundColor: '#fff5f5', padding: '20px', borderRadius: '8px' }}>
+      <div style={{ border: '1px solid #fecaca', backgroundColor: '#fef2f2', padding: '20px', borderRadius: '8px' }}>
        
         
         <button
@@ -112,7 +112,7 @@ const GlpiReset = () => {
           disabled={isResetting}
           style={{
             padding: '12px 24px',
-            backgroundColor: isResetting ? '#cca3a3' : '#d9534f',
+            backgroundColor: isResetting ? '#fca5a5' : '#ef4444',
             color: 'white',
             border: 'none',
             borderRadius: '4px',
@@ -126,11 +126,11 @@ const GlpiReset = () => {
       </div>
 
       {logs.length > 0 && (
-        <div style={{ marginTop: '20px', backgroundColor: '#1e1e1e', color: '#39ff14', padding: '15px', height: '250px', overflowY: 'auto', borderRadius: '4px', fontFamily: 'monospace' }}>
-          <strong style={{ color: 'white' }}>Console de reset :</strong>
+        <div style={{ marginTop: '20px', backgroundColor: '#f8fafc', color: '#0f172a', padding: '15px', height: '250px', overflowY: 'auto', borderRadius: '4px', fontFamily: 'monospace', border: '1px solid #e2e8f0' }}>
+          <strong style={{ color: '#0072ff' }}>Console de reset :</strong>
           <div style={{ marginTop: '10px' }}>
             {logs.map((log, i) => (
-              <div key={i} style={{ marginBottom: '4px', fontSize: '13px' }}>{log}</div>
+              <div key={i} style={{ marginBottom: '4px', fontSize: '13px', color: '#475569' }}>{log}</div>
             ))}
           </div>
         </div>

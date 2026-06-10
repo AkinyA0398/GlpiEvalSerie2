@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useCsvParser, useTicketCsvParser, useCostCsvParser } from '../services/ParserCsv'; 
 import JSZip from 'jszip';
 import {  
@@ -11,7 +11,6 @@ import {
   linkItemToTicket,
   addUserProfileAndEntity,
   addGlpiTicketCost, 
-  updateTicketExternalId,
   uploadGlpiDocument, 
   linkDocumentToItem
 } from '../services/CrudService';
@@ -387,25 +386,25 @@ const CsvDynamicTester = () => {
 };
 
 const styles = {
-  page: { backgroundColor: '#121212', color: '#f8fafc', fontFamily: 'system-ui, -apple-system, sans-serif', minHeight: '100vh', padding: '30px' },
+  page: { backgroundColor: '#f1f5f9', color: '#0f172a', fontFamily: 'system-ui, -apple-system, sans-serif', minHeight: '100vh', padding: '30px' },
   header: { marginBottom: '32px' },
-  mainTitle: { fontSize: '24px', fontWeight: '700', color: '#00d2ff', margin: '0 0 8px 0' },
-  subtitle: { fontSize: '14px', color: '#cbd5e1', margin: 0 },
+  mainTitle: { fontSize: '24px', fontWeight: '700', color: '#0072ff', margin: '0 0 8px 0' },
+  subtitle: { fontSize: '14px', color: '#64748b', margin: 0 },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '32px' },
-  card: { backgroundColor: '#1e1e1e', border: '1px solid #334155', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' },
-  cardHeader: { fontSize: '14px', fontWeight: '600', color: '#cbd5e1', borderBottom: '1px solid #334155', paddingBottom: '10px' },
+  card: { backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' },
+  cardHeader: { fontSize: '14px', fontWeight: '600', color: '#475569', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' },
   inputWrapper: { display: 'flex', flexDirection: 'column', gap: '10px' },
   fileInput: { display: 'none' },
-  fileLabel: { display: 'block', textAlign: 'center', backgroundColor: 'transparent', border: '1px solid #334155', color: '#00d2ff', padding: '10px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', transition: 'all 0.2s' },
-  badgeSuccess: { backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', color: '#10b981', padding: '6px 12px', borderRadius: '4px', fontSize: '12px', textAlign: 'center', fontWeight: '600' },
+  fileLabel: { display: 'block', textAlign: 'center', backgroundColor: '#f8fafc', border: '1px dashed #cbd5e1', color: '#0072ff', padding: '10px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', transition: 'all 0.2s' },
+  badgeSuccess: { backgroundColor: '#ecfdf5', border: '1px solid #10b981', color: '#059669', padding: '6px 12px', borderRadius: '4px', fontSize: '12px', textAlign: 'center', fontWeight: '600' },
   actionSection: { display: 'flex', justifyContent: 'center', marginBottom: '32px' },
-  btnActive: { backgroundColor: '#00d2ff', color: '#121212', border: 'none', padding: '14px 40px', borderRadius: '6px', cursor: 'pointer', fontWeight: '700', fontSize: '15px', transition: 'background 0.2s', textTransform: 'uppercase', letterSpacing: '0.5px' },
-  btnDisabled: { backgroundColor: '#1e293b', color: '#64748b', border: '1px solid #334155', padding: '14px 40px', borderRadius: '6px', cursor: 'not-allowed', fontWeight: '700', fontSize: '15px' },
-  terminalContainer: { backgroundColor: '#121212', border: '1px solid #334155', borderRadius: '8px', padding: '20px', fontFamily: 'Consolas, Monaco, monospace' },
-  terminalHeader: { fontSize: '13px', fontWeight: '600', color: '#00d2ff', textTransform: 'uppercase', marginBottom: '14px', letterSpacing: '0.5px' },
+  btnActive: { backgroundImage: 'linear-gradient(135deg, #0072ff 0%, #00c6ff 100%)', color: '#ffffff', border: 'none', padding: '14px 40px', borderRadius: '6px', cursor: 'pointer', fontWeight: '700', fontSize: '15px', transition: 'box-shadow 0.2s', textTransform: 'uppercase', letterSpacing: '0.5px', boxShadow: '0 4px 6px -1px rgba(0, 114, 255, 0.2)' },
+  btnDisabled: { backgroundColor: '#e2e8f0', color: '#94a3b8', border: '1px solid #cbd5e1', padding: '14px 40px', borderRadius: '6px', cursor: 'not-allowed', fontWeight: '700', fontSize: '15px' },
+  terminalContainer: { backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '20px', fontFamily: 'Consolas, Monaco, monospace', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' },
+  terminalHeader: { fontSize: '13px', fontWeight: '600', color: '#0072ff', textTransform: 'uppercase', marginBottom: '14px', letterSpacing: '0.5px' },
   terminalContent: { height: '260px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px' },
   emptyLog: { color: '#64748b', fontSize: '13px', fontStyle: 'italic' },
-  logLine: { fontSize: '13px', color: '#cbd5e1', borderLeft: '2px solid #334155', paddingLeft: '8px', lineHeight: '1.4' }
+  logLine: { fontSize: '13px', color: '#475569', borderLeft: '2px solid #e2e8f0', paddingLeft: '8px', lineHeight: '1.4' }
 };
 
 export default CsvDynamicTester;
