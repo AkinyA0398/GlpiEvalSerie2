@@ -23,6 +23,7 @@ const AdminLayout = ({ children }) => {
           <Link to="/adminTicket" style={styles.navLink}>Gestion des tickets</Link>
           <Link to="/testCsv" style={styles.navLink}>Importation de données</Link>
           <Link to="/admin/reset" style={styles.navLink}>Réinitialisation</Link>
+          <Link to="/front" style={styles.navLink}>Liste Kanban Ticket</Link>
           <Link to="/list" style={styles.navLinkPublic}>Vue publique du parc</Link>
         </nav>
 

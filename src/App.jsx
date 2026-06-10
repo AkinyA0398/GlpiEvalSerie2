@@ -1,5 +1,5 @@
-import React from 'react';
 import { createBrowserRouter, RouterProvider, Navigate, useNavigate } from 'react-router-dom';
+
 import TestUsers from './components/TestUsers';
 import AddUser from './components/addUser';
 import FormulaireSquelette from './squelette/Formulaire';
@@ -12,6 +12,8 @@ import GlpiItemList from './components/GlpiItemList';
 import CreateTicket from './components/CreateTicket';
 import GlpiDashboard from './components/GlpiDashboard';
 import TicketsList from './components/TicketsList';
+import FrontOfficeKanban from './components/FrontOfficeKanban';
+
 
 import AdminLayout from './components/AdminLayout';
 import ResetData from './components/ResetData';
@@ -85,6 +87,12 @@ const router = createBrowserRouter([
       </ProtectedAdmin>
     )
   },
+  // --- EN FRONT OFFICE ---
+  {
+    path: '/front',
+    element: <FrontOfficeKanban />
+  },
+
   {
     path: '/adminTicket',
     element: (
@@ -116,7 +124,7 @@ const router = createBrowserRouter([
     )
   },
 
-  // --- ENCIENNES ROUTES DE TEST (À GARDER OU TRIER PLUS TARD) ---
+  // --- ANCIENNES ROUTES DE TEST (À GARDER OU TRIER PLUS TARD) ---
   {
     path: '/tableau',
     element: (

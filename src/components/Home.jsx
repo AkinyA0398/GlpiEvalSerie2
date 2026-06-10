@@ -15,7 +15,7 @@ const Home = () => {
     }
   };
   const handleFront =()=>{
-    navigate("/testCsv");
+    navigate("/list");
   }
 
   return (
