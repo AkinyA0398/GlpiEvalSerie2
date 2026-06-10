@@ -70,6 +70,19 @@ export default function FrontOfficeKanban() {
 
   // Backoffice kanban config
   const [kanbanStatuses, setKanbanStatuses] = useState(STATUSES);
+  const [isKanbanConfigOpen, setIsKanbanConfigOpen] = useState(false);
+  const [kanbanConfigDraft, setKanbanConfigDraft] = useState(null); // list payload
+
+
+  const defaultKanbanConfig = [
+    { status_id: 1, bg: STATUSES.find((s) => s.id === 1)?.bg || '#eff6ff', color: STATUSES.find((s) => s.id === 1)?.color || '#0072ff', border: STATUSES.find((s) => s.id === 1)?.border || '#bfdbfe', label_mg: 'vaovao' },
+    { status_id: 2, bg: STATUSES.find((s) => s.id === 2)?.bg || '#f0f9ff', color: STATUSES.find((s) => s.id === 2)?.color || '#0284c7', border: STATUSES.find((s) => s.id === 2)?.border || '#bae6fd', label_mg: 'efa manao' },
+    { status_id: 3, bg: STATUSES.find((s) => s.id === 3)?.bg || '#ecfdf5', color: STATUSES.find((s) => s.id === 3)?.color || '#059669', border: STATUSES.find((s) => s.id === 3)?.border || '#a7f3d0', label_mg: 'vita' },
+  ];
+
+
+
+
 
 
 
@@ -161,9 +174,36 @@ export default function FrontOfficeKanban() {
     await loadTickets();
   };
 
+  const loadKanbanConfigAndDraft = async () => {
+    try {
+      const apiBase = 'http://localhost:5000';
+      const res = await fetch(`${apiBase}/kanban/config`);
+      if (!res.ok) return;
+      const config = await res.json();
+      if (!Array.isArray(config) || config.length === 0) return;
+      setKanbanConfigDraft(config);
+      // applique avec langue courante
+      const savedLang = localStorage.getItem('kanban_lang');
+      const langMode = savedLang === 'fr' ? 'fr' : 'mg';
+      setKanbanStatuses(applyKanbanConfigToStatuses(config, langMode));
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    if (!isKanbanConfigOpen) return;
+    // chargement asynchrone propre
+    (async () => {
+      await loadKanbanConfigAndDraft();
+    })();
+  }, [isKanbanConfigOpen]);
+
+
 
 
   const requiresExtraInfoForTransition = (fromStatusId, toStatusId) => {
+
     // Contrainte demandée : une boîte de dialogue dès qu’un changement de statut
     // nécessite des informations supplémentaires.
     // Ici, on applique une règle "clôture" : toute transition vers "Terminé" (3)
@@ -304,7 +344,16 @@ export default function FrontOfficeKanban() {
             </select>
           </div>
 
-          <button onClick={loadKanbanConfig} style={styles.refreshBtn}>Couleurs & libellés</button>
+          <button
+            onClick={() => {
+              // ouverture pop-up pour config couleurs/libellés
+              setIsKanbanConfigOpen(true);
+            }}
+            style={styles.refreshBtn}
+          >
+            Couleurs & libellés
+          </button>
+
 
           <button
             onClick={() => {
@@ -425,9 +474,158 @@ export default function FrontOfficeKanban() {
         </div>
       )}
 
+      {isKanbanConfigOpen && (
+        <div style={styles.modalOverlay} onClick={() => setIsKanbanConfigOpen(false)}>
+          <div style={styles.modalContentSmall} onClick={(e) => e.stopPropagation()}>
+            <div style={styles.modalHeader}>
+              <div>
+                <span style={styles.modalTag}>Backoffice</span>
+                <h3 style={styles.modalTitle}>Configurer les 3 statuts Kanban</h3>
+              </div>
+              <button style={styles.modalCloseBtn} onClick={() => setIsKanbanConfigOpen(false)}>&times;</button>
+            </div>
+
+            <div style={styles.modalBody}>
+              {(kanbanConfigDraft || defaultKanbanConfig).map((item) => (
+                <div key={item.status_id} style={{ ...styles.configBlock, borderColor: item.border }}>
+                  <div style={styles.configTitleRow}>
+                    <div style={{ fontWeight: 900 }}>
+                      Statut #{item.status_id}
+                    </div>
+                    <div
+                      style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: item.bg, border: `1px solid ${item.border}` }}
+                      title={item.bg}
+                    />
+                  </div>
+
+                  <div style={styles.configGrid}>
+                    <div style={styles.formGroup}>
+                      <label style={styles.label}>Couleur texte</label>
+                      <input
+                        value={item.color}
+                        onChange={(e) =>
+                          setKanbanConfigDraft(
+                            (prev) =>
+                              (prev || defaultKanbanConfig).map((x) =>
+                                x.status_id === item.status_id ? { ...x, color: e.target.value } : x
+                              )
+                          )
+                        }
+                        style={styles.inputColor}
+                      />
+                    </div>
+
+                    <div style={styles.formGroup}>
+                      <label style={styles.label}>Couleur fond</label>
+                      <input
+                        value={item.bg}
+                        onChange={(e) =>
+                          setKanbanConfigDraft(
+                            (prev) =>
+                              (prev || defaultKanbanConfig).map((x) =>
+                                x.status_id === item.status_id ? { ...x, bg: e.target.value } : x
+                              )
+                          )
+                        }
+                        style={styles.inputColor}
+                      />
+                    </div>
+
+                    <div style={styles.formGroup}>
+                      <label style={styles.label}>Couleur bordure</label>
+                      <input
+                        value={item.border}
+                        onChange={(e) =>
+                          setKanbanConfigDraft(
+                            (prev) =>
+                              (prev || defaultKanbanConfig).map((x) =>
+                                x.status_id === item.status_id ? { ...x, border: e.target.value } : x
+                              )
+                          )
+                        }
+                        style={styles.inputColor}
+                      />
+                    </div>
+
+                    <div style={styles.formGroup}>
+                      <label style={styles.label}>Libellé malgache</label>
+                      <input
+                        value={item.label_mg}
+                        onChange={(e) =>
+                          setKanbanConfigDraft(
+                            (prev) =>
+                              (prev || defaultKanbanConfig).map((x) =>
+                                x.status_id === item.status_id ? { ...x, label_mg: e.target.value } : x
+                              )
+                          )
+                        }
+                        style={styles.inputText}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={styles.modalFooter}>
+              <button
+                onClick={() => {
+                  setIsKanbanConfigOpen(false);
+                }}
+                style={styles.btnSecondary}
+              >
+                Annuler
+              </button>
+
+              <button
+                onClick={async () => {
+                  try {
+                    const payload = (kanbanConfigDraft || defaultKanbanConfig).map((x) => ({
+                      status_id: Number(x.status_id),
+                      bg: x.bg,
+                      color: x.color,
+                      border: x.border,
+                      label_mg: x.label_mg,
+                    }));
+
+                    const apiBase = 'http://localhost:5000';
+                    const res = await fetch(`${apiBase}/kanban/config`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(payload),
+                    });
+
+                    if (!res.ok) {
+                      setMessage({ text: 'Echec sauvegarde config kanban', type: 'error' });
+                      return;
+                    }
+
+                    // recharge et applique
+                    const savedLang = localStorage.getItem('kanban_lang');
+                    const langMode = savedLang === 'fr' ? 'fr' : 'mg';
+                    setKanbanConfigDraft(payload);
+                    setKanbanStatuses(applyKanbanConfigToStatuses(payload, langMode));
+                    setIsKanbanConfigOpen(false);
+                    setMessage({ text: 'Config kanban enregistrée', type: 'success' });
+                  } catch {
+                    setMessage({ text: 'Echec sauvegarde config kanban', type: 'error' });
+                  }
+                }}
+                style={styles.btnPrimary}
+              >
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isStatusModalOpen && pendingDrag && (
         <div style={styles.modalOverlay} onClick={cancelStatusModal}>
+
           <div style={styles.modalContentSmall} onClick={(e) => e.stopPropagation()}>
+
+
             <div style={styles.modalHeader}>
               <div>
                 <span style={styles.modalTag}>Information requise</span>
