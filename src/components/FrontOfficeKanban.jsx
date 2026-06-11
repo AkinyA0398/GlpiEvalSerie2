@@ -517,18 +517,60 @@ export default function FrontOfficeKanban() {
 
                     <div style={styles.formGroup}>
                       <label style={styles.label}>Couleur fond</label>
-                      <input
-                        value={item.bg}
-                        onChange={(e) =>
-                          setKanbanConfigDraft(
-                            (prev) =>
+
+                      {/* Carré cliquable + color picker */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const el = document.getElementById(`bg-picker-${item.status_id}`);
+                            if (el) el.click();
+                          }}
+                          style={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: 8,
+                            backgroundColor: item.bg,
+                            border: `1px solid ${item.border}`,
+                            cursor: 'pointer',
+                          }}
+                          title={`Clique pour choisir (${item.bg})`}
+                        />
+
+                        <input
+                          id={`bg-picker-${item.status_id}`}
+                          type="color"
+                          value={/^#([0-9a-fA-F]{6})$/.test(item.bg) ? item.bg : '#ffffff'}
+                          onChange={(e) =>
+                            setKanbanConfigDraft((prev) =>
                               (prev || defaultKanbanConfig).map((x) =>
                                 x.status_id === item.status_id ? { ...x, bg: e.target.value } : x
                               )
-                          )
-                        }
-                        style={styles.inputColor}
-                      />
+                            )
+                          }
+                          style={{
+                            width: 36,
+                            height: 36,
+                            padding: 0,
+                            border: 'none',
+                            background: 'transparent',
+                            cursor: 'pointer',
+                          }}
+                        />
+
+                        <input
+                          value={item.bg}
+                          onChange={(e) =>
+                            setKanbanConfigDraft(
+                              (prev) =>
+                                (prev || defaultKanbanConfig).map((x) =>
+                                  x.status_id === item.status_id ? { ...x, bg: e.target.value } : x
+                                )
+                            )
+                          }
+                          style={styles.inputColor}
+                        />
+                      </div>
                     </div>
 
                     <div style={styles.formGroup}>
