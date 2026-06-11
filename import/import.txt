@@ -7,3 +7,6 @@ ordinateur
 
 ticket:
 cout:
+
+
+computer; monitor; phone
