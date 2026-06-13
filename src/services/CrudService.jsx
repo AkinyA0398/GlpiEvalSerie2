@@ -33,7 +33,7 @@ export const deleteGlpiGroup = async (groupId) => {
   try {
     const payload = {
       input: {
-        id: Number(groupId) 
+        id: Number(groupId)
       }
     };
 
@@ -229,7 +229,7 @@ export const createDetailedGlpiItem = async (itemType, details) => {
         groups_id: details.groupId || 0,
         manufacturers_id: details.manufacturerId || 0,
         [`${itemType.toLowerCase()}models_id`]: details.modelId || 0,
-        otherserial: details.inventoryNumber || "", 
+        otherserial: details.inventoryNumber || "",
         users_id: details.userId || 0
       }
     };
@@ -273,7 +273,7 @@ export const createGlpiCustomStatus = async (statusName, options = {}) => {
       body: JSON.stringify(payload)
     });
 
-    return response; 
+    return response;
   } catch (error) {
     console.error("Erreur lors de la création du statut global :", error);
     throw error;
@@ -324,10 +324,10 @@ export const createGlpiTicket = async (ticketDetails) => {
   try {
     const priorities = { low: 2, medium: 3, high: 4, urgent: 5 };
     const types = { incident: 1, request: 2, demande: 2 };
-    
-    const statuses = { 
+
+    const statuses = {
       new: 1, incoming: 1, nouveau: 1,
-      processing: 2, assigned: 2, encours: 2,inprogress:2,
+      processing: 2, assigned: 2, encours: 2, inprogress: 2,
       planned: 3, planifie: 3,
       pending: 4, enattente: 4,
       solved: 5, resolu: 5,
@@ -337,27 +337,27 @@ export const createGlpiTicket = async (ticketDetails) => {
     const csvType = String(ticketDetails.type).toLowerCase();
     const csvPriority = String(ticketDetails.priority).toLowerCase();
     const csvStatus = String(ticketDetails.status).toLowerCase().replace(/\s+/g, '');
-    
+
     const payload = {
       input: {
         name: ticketDetails.title,
         content: ticketDetails.description,
-        type: types[csvType] || 1,         
-        priority: priorities[csvPriority] || 3, 
-        status: statuses[csvStatus] || 1,     
+        type: types[csvType] || 1,
+        priority: priorities[csvPriority] || 3,
+        status: statuses[csvStatus] || 1,
         date: ticketDetails.fullDateTime,
         actiontime: ticketDetails.duration || 0,
         externalid: String(ticketDetails.externalRef || "").trim()
       }
     };
-    console.log("json:",payload);
-    console.log("external_id: "+String(ticketDetails.externalRef || "").trim());
+    console.log("json:", payload);
+    console.log("external_id: " + String(ticketDetails.externalRef || "").trim());
     const response = await apiGlpi('Ticket', {
       method: 'POST',
       body: JSON.stringify(payload)
     });
 
-    return response; 
+    return response;
   } catch (error) {
     console.error("Erreur lors de la création du ticket GLPI :", error);
     throw error;
@@ -387,9 +387,9 @@ export const addGlpiTicketCost = async (ticketId, fixedCost, timeCost, duration 
 
     return await apiGlpi('TicketCost', {
       method: 'POST',
-      body: JSON.stringify(payload) 
+      body: JSON.stringify(payload)
     });
-    
+
   } catch (error) {
     console.error(`Impossible d'ajouter le coût au ticket #${ticketId}:`, error);
   }
@@ -437,8 +437,8 @@ export const addUserProfileAndEntity = async (userId, profileId = 1, entityId = 
     const payload = {
       input: {
         users_id: userId,
-        profiles_id: profileId, 
-        entities_id: entityId,   
+        profiles_id: profileId,
+        entities_id: entityId,
         is_recursive: 1
       }
     };
@@ -454,21 +454,21 @@ export const addUserProfileAndEntity = async (userId, profileId = 1, entityId = 
 export const uploadGlpiDocument = async (fileBlob, fileName) => {
   try {
     const formData = new FormData();
-    
+
     const uploadManifest = {
       input: {
         name: fileName,
         filename: fileName
       }
     };
-    
+
     formData.append('uploadManifest', JSON.stringify(uploadManifest));
     formData.append('filename[]', fileBlob, fileName);
 
     const response = await apiGlpi('Document', {
       method: 'POST',
       body: formData,
-      isFormData: true 
+      isFormData: true
     });
 
     return response; // Retourne { id: X, message: "..." }
@@ -505,14 +505,14 @@ export const fetchGlpiDocumentItems = async () => {
 };
 export const getGlpiDocumentDownloadUrl = (documentId) => {
   const sessionToken = localStorage.getItem('glpi_session_token');
-  const appToken = "wEcFt3X7Ce1rXnwb3mMDi132vcLDmLbDQ8yeLJAH"; 
-  
+  const appToken = "7JjLfaEu6uCk5OsZVp3nnCG8FzpyW5s2xkgGYWzD";
+
   return `http://glpi.localhost/apirest.php/Document/${documentId}/Base64?app_token=${appToken}&session_token=${sessionToken}`;
 };
 export const fetchGlpiDocumentImage = async (documentId) => {
   try {
     const sessionToken = localStorage.getItem('glpi_session_token');
-    const appToken = "wEcFt3X7Ce1rXnwb3mMDi132vcLDmLbDQ8yeLJAH"; 
+    const appToken = "7JjLfaEu6uCk5OsZVp3nnCG8FzpyW5s2xkgGYWzD";
 
     const url = `http://glpi.localhost/apirest.php/Document/${documentId}?app_token=${appToken}&alt=media`;
 
@@ -529,7 +529,7 @@ export const fetchGlpiDocumentImage = async (documentId) => {
     }
 
     const imageBlob = await response.blob();
-    
+
     return URL.createObjectURL(imageBlob);
   } catch (error) {
     console.error(`Impossible de charger l'image du document ${documentId}:`, error);
