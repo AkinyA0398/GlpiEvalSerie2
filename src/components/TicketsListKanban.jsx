@@ -46,14 +46,6 @@ const TicketsListKanban = () => {
   const STATUS_IN_PROGRESS = 2; 
   const STATUS_CLOSED = 6;      
 
-  useEffect(() => {
-    let isMounted = true;
-    if (isMounted) {
-      loadAllTicketsData();
-    }
-    return () => { isMounted = false; };
-  }, [loadAllTicketsData]);
-
   const loadAllTicketsData = useCallback(async () => {
     setLoading(true);
     try {
@@ -94,6 +86,14 @@ const TicketsListKanban = () => {
       setLoading(false);
     }
   }, [CURRENT_LANG]);
+
+    useEffect(() => {
+    let isMounted = true;
+    if (isMounted) {
+      loadAllTicketsData();
+    }
+    return () => { isMounted = false; };
+  }, [loadAllTicketsData]);
 
   const handleDragStart = (e, ticketId) => {
     e.dataTransfer.setData('text/plain', ticketId);
