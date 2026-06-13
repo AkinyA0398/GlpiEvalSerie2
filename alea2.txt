@@ -1,0 +1,2 @@
+option 1 : afaka averina ny am in progress ny efa clos (kanban) + boite de dialogue avec annulation (annule le coût enregistrer lors du mvt vers clos) (pas de coût)
+option 2 : misy hoe reouverture avec champ en pourcentage + valider => coût de reouverture (if 100% supercost, 10% reouverture / 95% supercost, 9.5% reouverture)

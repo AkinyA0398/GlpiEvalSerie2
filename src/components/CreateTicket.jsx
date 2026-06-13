@@ -19,7 +19,7 @@ const CreateTicket = () => {
 
   const loadParcItems = async () => {
     try {
-      const typesToFetch = ['Computer', 'Monitor', 'NetworkEquipment', 'Peripheral'];
+      const typesToFetch = ['Computer', 'Monitor', 'NetworkEquipment', 'Phone'];
       const promises = typesToFetch.map(async (type) => {
         try {
           const res = await fetchGlpiItems(type);

@@ -7,7 +7,7 @@ const GlpiDashboard = () => {
 
   const [itemStats, setItemStats] = useState({
     total: 0,
-    byType: { Computer: 0, Monitor: 0, NetworkEquipment: 0, Peripheral: 0 }
+    byType: { Computer: 0, Monitor: 0, NetworkEquipment: 0, Phone: 0 }
   });
 
   const [ticketStats, setTicketStats] = useState({
@@ -21,7 +21,7 @@ const GlpiDashboard = () => {
     setLoading(true);
     setError(null);
     try {
-      const itemTypes = ['Computer', 'Monitor', 'NetworkEquipment', 'Peripheral'];
+      const itemTypes = ['Computer', 'Monitor', 'NetworkEquipment', 'Phone'];
       const itemPromises = itemTypes.map(async (type) => {
         try {
           const res = await fetchGlpiItems(type);
@@ -106,7 +106,7 @@ const GlpiDashboard = () => {
     Computer: { label: 'Ordinateurs', gradient: 'linear-gradient(90deg, #0072ff, #00c6ff)' },
     Monitor: { label: 'Ecrans', gradient: 'linear-gradient(90deg, #38bdf8, #7dd3fc)' },
     NetworkEquipment: { label: 'Materiels Reseau', gradient: 'linear-gradient(90deg, #0ea5e9, #38bdf8)' },
-    Peripheral: { label: 'Peripheriques', gradient: 'linear-gradient(90deg, #0284c7, #0ea5e9)' }
+    Phone: { label: 'Phone', gradient: 'linear-gradient(90deg, #0284c7, #0ea5e9)' }
   };
 
   return (

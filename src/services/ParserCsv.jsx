@@ -23,24 +23,31 @@ export const extractItemsArray = (rawItemsString) => {
 /**
  * Découpeur de ligne CSV intelligent : respecte les espaces ET les blocs entre guillemets
  */
-const splitCsvLine = (line) => {
+const splitCsvLine = (line, separator = ',') => {
   const result = [];
   let current = '';
   let inQuotes = false;
 
-  for (let char of line) {
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+
     if (char === '"') {
+      // Toggle quotes
       inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
+      continue;
+    }
+
+    if (char === separator && !inQuotes) {
       result.push(current);
       current = '';
-    } else {
-      current += char;
+      continue;
     }
+
+    current += char;
   }
 
   result.push(current);
-  return result;
+  return result.map(v => v.trim());
 };
 /**
  * Hook de parsing pour les fichiers du parc informatique
@@ -80,7 +87,8 @@ export function useCsvParser({ separator = ',', hasHeader = true }) {
           const line = lines[i].trim();
           if (!line) continue;
 
-          const fields = line.split(separator).map(field => field.trim());
+          // découpage CSV robuste (guillemets supportés)
+          const fields = splitCsvLine(line, separator);
           const [name, status, location, manufacturer, itemType, model, inventoryNumber, user] = fields;
 
           if (!name) continue;
@@ -178,7 +186,7 @@ export function useTicketCsvParser({ hasHeader = true }) {
           const line = lines[i].trim();
           if (!line) continue;
 
-          const fields = splitCsvLine(line);
+          const fields = splitCsvLine(line, ',');
 
           const [
             refTicket,
@@ -192,7 +200,7 @@ export function useTicketCsvParser({ hasHeader = true }) {
             itemsRaw
           ] = fields;
 
-          const itemsArray = extractItemsArray(itemsRaw);
+          const itemsArray = extractItemsArray((itemsRaw ?? '').trim().replace(/^"|"$/g, ''));
 
           parsedTickets.push({
             refTicket,

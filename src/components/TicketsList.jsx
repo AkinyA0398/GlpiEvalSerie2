@@ -342,10 +342,11 @@ const TicketsList = () => {
             <div style={styles.modalFooter}>
               <button
                 onClick={() => handleDelete(selectedTicket.id)}
-                disabled={actionLoading}
-                style={actionLoading ? styles.btnDeleteDisabled : styles.btnDeleteActive}
+                disabled={actionLoading || Number(selectedTicket?.status) === 6}
+                style={actionLoading || Number(selectedTicket?.status) === 6 ? styles.btnDeleteDisabled : styles.btnDeleteActive}
+                title={Number(selectedTicket?.status) === 6 ? 'Ticket clôturé (Clos) : purge interdite' : undefined}
               >
-                {actionLoading ? 'Purge...' : 'Purger le ticket'}
+                {actionLoading ? 'Purge...' : (Number(selectedTicket?.status) === 6 ? 'Purger le ticket (bloqué)' : 'Purger le ticket')}
               </button>
               <button style={styles.btnCloseModal} onClick={() => setIsModalOpen(false)}>
                 Fermer le dossier

@@ -223,7 +223,9 @@ const CsvDynamicTester = () => {
 
         for (const ticket of ticketData) {
           try {
-            const csvRef = String(ticket.refTicket || "").trim();
+            const csvRef = String(ticket.refTicket ?? "").trim();
+            // fallback si parsing header/quotes foireux
+            const csvRefClean = csvRef.replace(/^"|"$/g, '');
             const csvDate = String(ticket.date || "").trim();
             const csvTime = String(ticket.time || "").trim();
             const csvTitle = ticket.title || "";
@@ -232,8 +234,8 @@ const CsvDynamicTester = () => {
             const csvPriority = ticket.priority || "Medium";
             const csvStatus = ticket.status || "New";
 
-            if (!csvRef || csvRef === "undefined" || csvRef === "") {
-              continue; 
+            if (!csvRefClean || csvRefClean === "undefined") {
+              continue;
             }
 
             // Formattage de la date pour GLPI
@@ -246,7 +248,7 @@ const CsvDynamicTester = () => {
             const finalGlpiDateTime = `${formattedDate} ${formattedTime}`;
 
             // 1. Récupération de TOUTES les lignes correspondantes à ce ticket dans le CSV de coûts
-            const matchedCostRows = costData.filter(c => String(c.tickets_id).trim() === csvRef);
+            const matchedCostRows = costData.filter(c => String(c.tickets_id).trim() === csvRefClean);
 
             // Pour la création du ticket principal, on calcule la durée cumulée totale
             const totalDurationSeconds = matchedCostRows.reduce((sum, row) => sum + (parseInt(row.actiontime, 10) || 0), 0);
@@ -260,7 +262,7 @@ const CsvDynamicTester = () => {
               status: csvStatus,
               fullDateTime: finalGlpiDateTime,
               duration: totalDurationSeconds, // Durée totale de toutes les interventions cumulées
-              externalRef: csvRef
+              externalRef: csvRefClean
             });
 
             const newTicketId = ticketRes.id;
@@ -287,15 +289,29 @@ const CsvDynamicTester = () => {
               }
 
               // 4. Liaison des équipements associés au ticket
-              let itemsArray = ticket.items || [];
+              const itemsArray = Array.isArray(ticket.items) ? ticket.items : [];
               if (itemsArray.length > 0) {
                 for (const itemName of itemsArray) {
-                  const matchedDevice = createdDevicesMap[itemName];
-                  if (matchedDevice) {
-                    await linkItemToTicket(newTicketId, matchedDevice.type, matchedDevice.id);
-                    addLog(`   -> Équipement lié : ${itemName} (${matchedDevice.type})`);
+                  const normalizedItemName = String(itemName ?? '').trim().replace(/^"|"$/g, '');
+                  if (!normalizedItemName) continue;
+
+                  const matchedDevice = createdDevicesMap[normalizedItemName];
+            if (matchedDevice) {
+                    // Sécurise la forme de l'itemtype avant appel API
+                    const normalizedType = String(matchedDevice.type ?? '').trim().toLowerCase();
+                    const typeMap = {
+                      computer: 'Computer',
+                      monitor: 'Monitor',
+                      networkequipment: 'NetworkEquipment',
+                      network_equipment: 'NetworkEquipment',
+                      Phone: 'Phone'
+                    };
+                    const safeItemType = typeMap[normalizedType] || (matchedDevice.type.charAt(0).toUpperCase() + matchedDevice.type.slice(1));
+
+                    await linkItemToTicket(newTicketId, safeItemType, matchedDevice.id, { skipForbidden: true });
+                    addLog(`   -> Équipement lié : ${normalizedItemName} (${safeItemType})`);
                   } else {
-                    addLog(`   -> Matériel "${itemName}" absent du parc.`);
+                    addLog(`   -> Matériel "${normalizedItemName}" absent du parc.`);
                   }
                 }
               }

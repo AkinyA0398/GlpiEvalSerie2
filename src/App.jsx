@@ -2,7 +2,6 @@ import { createBrowserRouter, RouterProvider, Navigate, useNavigate } from 'reac
 
 import TestUsers from './components/TestUsers';
 import AddUser from './components/addUser';
-import FormulaireSquelette from './squelette/Formulaire';
 import TableauSquelette from './squelette/Tableau';
 import Popup from './squelette/Popup';
 import LoginBack from './components/LoginBack';
@@ -13,7 +12,7 @@ import CreateTicket from './components/CreateTicket';
 import GlpiDashboard from './components/GlpiDashboard';
 import TicketsList from './components/TicketsList';
 import FrontOfficeKanban from './components/FrontOfficeKanban';
-
+import TicketsCosts from './components/TicketsCosts';
 
 import AdminLayout from './components/AdminLayout';
 import ResetData from './components/ResetData';
@@ -92,6 +91,17 @@ const router = createBrowserRouter([
     path: '/front',
     element: <FrontOfficeKanban />
   },
+  {
+    path: '/costs',
+    element: (
+      <ProtectedAdmin>
+        <AdminLayout>
+          <TicketsCosts />
+        </AdminLayout>
+      </ProtectedAdmin>
+    )
+  },
+
 
   {
     path: '/adminTicket',

@@ -38,7 +38,7 @@ Tu devez générer, compléter et structurer l'application en respectant STRICTE
 
 4. BACKOFFICE : DASHBOARD (INDICATEURS)
 - Composant 'GlpiDashboard.jsx' en mode sombre.
-- Affiche le nombre d'éléments général du parc avec une répartition détaillée par type (Computer, Monitor, NetworkEquipment, Peripheral).
+- Affiche le nombre d'éléments général du parc avec une répartition détaillée par type (Computer, Monitor, NetworkEquipment, Phone).
 - Affiche le nombre général de tickets avec le détail exact par type (Incident vs Demande).
 - Utilise des barres de progression personnalisées en CSS aux couleurs bleu ciel et anthracite.
 

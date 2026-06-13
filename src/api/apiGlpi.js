@@ -1,5 +1,5 @@
 const BASE_URL = "http://glpi.localhost/apirest.php";
-const appToken = "DwC3GZB0ZsN4afeSf8LyVODH0ihvRydZ6FCsXD2p";
+const appToken = "7JjLfaEu6uCk5OsZVp3nnCG8FzpyW5s2xkgGYWzD";
 const tokenUser = "LB9ecmIe3nCyKwIjgDNFeq6Q1E1oXvurQjMwW7ec";
 
 export const apiGlpi = async (endpoint, options = {}) => {
@@ -65,13 +65,15 @@ export const apiGlpi = async (endpoint, options = {}) => {
  */
 export const initGlpiSession = async () => {
   try {
-    const data = await apiGlpi('initSession', {
+    const data = await apiGlpi('initSession?profiles_id=4', {
       method: 'GET',
       headers: {
         // Authentification par le token utilisateur (User Token)
         'Authorization': `user_token ${tokenUser}`
       }
     });
+
+    console.log("Réponse de initSession:", data);
 
     // GLPI renvoie un objet contenant { session_token: "le_token_generé" }
     if (data && data.session_token) {

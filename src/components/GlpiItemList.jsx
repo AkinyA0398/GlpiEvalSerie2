@@ -15,7 +15,7 @@ const GlpiItemList = () => {
   const [selectedManufacturer, setSelectedManufacturer] = useState('');
 
   // Listes de filtres uniques (Textuels)
-  const [typesList] = useState(['Computer', 'Monitor', 'NetworkEquipment', 'Peripheral']);
+  const [typesList] = useState(['Computer', 'Monitor', 'NetworkEquipment', 'Phone']);
   const [statusesList, setStatusesList] = useState([]);
   const [manufacturersList, setManufacturersList] = useState([]);
 
@@ -47,7 +47,7 @@ const GlpiItemList = () => {
         console.warn("Erreur lors du chargement des dictionnaires GLPI :", e);
       }
 
-      const typesToFetch = ['Computer', 'Monitor', 'NetworkEquipment', 'Peripheral']; 
+      const typesToFetch = ['Computer', 'Monitor', 'Phone']; 
       const itemsPromises = typesToFetch.map(async (type) => {
         try {
           const res = await fetchGlpiItems(type);

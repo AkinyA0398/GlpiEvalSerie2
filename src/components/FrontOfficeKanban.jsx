@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from 'react';
 import { apiGlpi, initGlpiSession } from '../api/apiGlpi';
 
@@ -29,7 +30,6 @@ function applyKanbanConfigToStatuses(configList, langMode) {
     };
   });
 }
-
 
 
 const PRIORITY_LABELS = {
@@ -81,12 +81,6 @@ export default function FrontOfficeKanban() {
   ];
 
 
-
-
-
-
-
-
   const [selectedTicketId, setSelectedTicketId] = useState(null);
   const [ticketDetails, setTicketDetails] = useState(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
@@ -96,6 +90,7 @@ export default function FrontOfficeKanban() {
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [pendingDrag, setPendingDrag] = useState(null); // { ticket, fromStatusId, toStatusId }
   const [extraNote, setExtraNote] = useState('');
+  
 
   const dragDataRef = useMemo(() => ({ current: null }), []);
 
@@ -105,10 +100,6 @@ export default function FrontOfficeKanban() {
       tickets: tickets.filter((t) => Number(t.status) === s.id),
     }));
   }, [tickets, kanbanStatuses]);
-
-
-
-
 
   const ensureSession = async () => {
     const hasToken = localStorage.getItem('glpi_session_token');
@@ -135,6 +126,40 @@ export default function FrontOfficeKanban() {
     }
   };
 
+  const autoClosePlannedTickets = async (ticketsList) => {
+    // Hypothèse métier (confirmée) : Planifié = status 3, Clos = status 6
+    // On clôture uniquement ceux qui ne sont pas déjà clos.
+    const planned = (ticketsList || []).filter((t) => Number(t?.status) === 3);
+    if (planned.length === 0) return ticketsList;
+
+    let closedCount = 0;
+    for (const t of planned) {
+      try {
+        await updateTicketStatus(t.id, 6, {
+          // GLPI: on renseigne un justificatif via content.
+          content: 'Clôture automatique : ticket Planifié (status=3) → Clos (status=6).',
+        });
+        closedCount += 1;
+      } catch (err) {
+        // Ne bloque pas le chargement : on continue.
+        // (Message agrégé pour éviter de spammer plusieurs fois.)
+        setMessage({
+          text: `Auto-clôture partielle : échec du ticket #${t.id} (${err.message}).`,
+          type: 'error',
+        });
+      }
+    }
+
+    if (closedCount > 0) {
+      setMessage({
+        text: `Auto-clôture : ${closedCount} ticket(s) Planifié(s) ont été passés en Clos.`,
+        type: 'success',
+      });
+    }
+
+    return ticketsList;
+  };
+
   const loadTickets = async () => {
     setLoading(true);
     setMessage({ text: '', type: '' });
@@ -142,6 +167,10 @@ export default function FrontOfficeKanban() {
       await ensureSession();
       const res = await apiGlpi('Ticket');
       const clean = Array.isArray(res) ? res : [];
+
+      // Auto-clôture avant affichage
+      await autoClosePlannedTickets(clean);
+
       // Order: newest first
       clean.sort((a, b) => Number(b.id) - Number(a.id));
       setTickets(clean);
@@ -199,18 +228,12 @@ export default function FrontOfficeKanban() {
     })();
   }, [isKanbanConfigOpen]);
 
-
-
-
   const requiresExtraInfoForTransition = (fromStatusId, toStatusId) => {
-
-    // Contrainte demandée : une boîte de dialogue dès qu’un changement de statut
-    // nécessite des informations supplémentaires.
-    // Ici, on applique une règle "clôture" : toute transition vers "Terminé" (3)
-    // requiert une note/justificatif.
-    // (Les autres transitions ne requièrent rien.)
+    // La clôture (Clos=6) nécessite une note/justificatif.
     return Number(toStatusId) === 3 && Number(fromStatusId) !== 3;
   };
+
+  const isTicketClosed = (ticket) => Number(ticket?.status) === 3;
 
   const openDetails = async (ticketId) => {
     setSelectedTicketId(ticketId);
@@ -233,9 +256,16 @@ export default function FrontOfficeKanban() {
     setSelectedTicketId(null);
     setTicketDetails(null);
     setExtraNote('');
+    // setCost('');
   };
 
   const handleDragStart = (ticket, fromStatusId) => (e) => {
+    // Ticket clos : verrouillé, aucune modification possible.
+    if (isTicketClosed(ticket)) {
+      e.preventDefault();
+      return;
+    }
+
     const data = { ticket, fromStatusId };
     dragDataRef.current = data;
     e.dataTransfer.effectAllowed = 'move';
@@ -261,9 +291,16 @@ export default function FrontOfficeKanban() {
 
     if (fromId === toId) return;
 
+    // Sécurité: même si un drag arrivait ici, on bloque les transitions depuis un ticket Clos.
+    if (Number(ticket?.status) === 6 || fromId === 6) {
+      setMessage({ text: `Ticket #${ticket?.id} déjà clos : modification interdite.`, type: 'error' });
+      return;
+    }
+
     if (requiresExtraInfoForTransition(fromId, toId)) {
       setPendingDrag({ ticket, fromStatusId: fromId, toStatusId: toId });
       setExtraNote('');
+      // setCost('');
       setIsStatusModalOpen(true);
       return;
     }
@@ -294,11 +331,41 @@ export default function FrontOfficeKanban() {
     try {
       // GLPI champ: content (ou eventualmente comment). Ici on utilise content comme note.
       // Si GLPI refuse ce champ en PUT sur Ticket, on ajustera.
-      await updateTicketStatus(pendingDrag.ticket.id, pendingDrag.toStatusId, { content: extraNote.trim() });
+      const ticketCostRaw = pendingDrag?.ticketCost;
+      const ticketCost = typeof ticketCostRaw === 'string' ? ticketCostRaw.trim() : '';
+
+      // GLPI: on envoie tout via le champ “content”.
+      const content = ticketCost
+        ? `${extraNote.trim()}\n\nCoût final: ${ticketCost}`
+        : extraNote.trim();
+
+      await updateTicketStatus(pendingDrag.ticket.id, pendingDrag.toStatusId, { content });
+
+      // Enregistrer le “nouveau prix” (valeur saisie dans la boîte Kanban) dans SQLite via Flask.
+      // Le backend fera: origin_price (somme TicketCost GLPI) + added_price (ce que l’utilisateur saisit) = total_price.
+      const costValueRaw = pendingDrag?.ticketCost;
+      const costValue = typeof costValueRaw === 'string' ? costValueRaw.trim() : '';
+      const costFloat = parseFloat(costValue);
+      if (!Number.isNaN(costFloat)) {
+        const apiBase = 'http://localhost:5000';
+        const res = await fetch(`${apiBase}/ticket-costs/new-price`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ticketId: pendingDrag.ticket.id, ticketCostLineId: null, costValue: costFloat }),
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(errText || 'Erreur POST new-price');
+        }
+      }
+
       setIsStatusModalOpen(false);
+      const movedTicketId = pendingDrag.ticket.id;
+      const movedToStatusId = pendingDrag.toStatusId;
       setPendingDrag(null);
       setExtraNote('');
-      setMessage({ text: `Ticket #${pendingDrag.ticket.id} déplacé vers ${getStatusConfig(pendingDrag.toStatusId)?.label || pendingDrag.toStatusId}.`, type: 'success' });
+      setMessage({ text: `Ticket #${movedTicketId} déplacé vers ${getStatusConfig(movedToStatusId)?.label || movedToStatusId}.`, type: 'success' });
       await refreshAfterUpdate();
     } catch (err) {
       setMessage({ text: `Echec changement statut: ${err.message}`, type: 'error' });
@@ -368,7 +435,6 @@ export default function FrontOfficeKanban() {
         </div>
       </div>
 
-
       {message.text && (
         <div style={message.type === 'success' ? styles.alertSuccess : styles.alertError}>{message.text}</div>
       )}
@@ -390,14 +456,18 @@ export default function FrontOfficeKanban() {
 
             <div style={styles.ticketList}>
               {col.tickets.map((ticket) => (
-                <div
-                  key={ticket.id}
-                  draggable
-                  onDragStart={handleDragStart(ticket, col.id)}
-                  onClick={() => openDetails(ticket.id)}
-                  style={styles.ticketCard}
-                  title={ticket.content ? String(ticket.content).slice(0, 120) : ''}
-                >
+                  <div
+                    key={ticket.id}
+                    draggable={!isTicketClosed(ticket)}
+                    onDragStart={handleDragStart(ticket, col.id)}
+                    onClick={() => openDetails(ticket.id)}
+                    style={{
+                      ...styles.ticketCard,
+                      cursor: isTicketClosed(ticket) ? 'not-allowed' : 'pointer',
+                      opacity: isTicketClosed(ticket) ? 0.85 : 1,
+                    }}
+                    title={ticket.content ? String(ticket.content).slice(0, 120) : ''}
+                  >
                   <div style={styles.ticketTopRow}>
                     <div style={styles.ticketId}>#{ticket.id}</div>
                     <div style={{ ...styles.statusPill, backgroundColor: col.bg, borderColor: col.border, color: col.color }}>
@@ -498,7 +568,7 @@ export default function FrontOfficeKanban() {
                     />
                   </div>
 
-                  <div style={styles.configGrid}>
+                  <div style={styles.configGrid}>cun ticket dans cette colonne.
                     <div style={styles.formGroup}>
                       <label style={styles.label}>Couleur texte</label>
                       <input
@@ -586,7 +656,7 @@ export default function FrontOfficeKanban() {
                           )
                         }
                         style={styles.inputColor}
-                      />
+                      /> 
                     </div>
 
                     <div style={styles.formGroup}>
@@ -688,6 +758,19 @@ export default function FrontOfficeKanban() {
                   onChange={(e) => setExtraNote(e.target.value)}
                   style={styles.textarea}
                   placeholder="Décrivez brièvement la clôture / actions effectuées..."
+                />
+              </div>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Coût final</label>
+                <textarea
+                  rows={5}
+                  value={pendingDrag?.ticketCost || ''}
+                  onChange={(e) => {
+                    // temporaire: stockage local dans l'objet pendingDrag pour éviter un nouveau state global
+                    setPendingDrag((prev) => (prev ? { ...prev, ticketCost: e.target.value } : prev));
+                  }}
+                  style={styles.textarea}
+                  placeholder="Mettez le coût final si pertinent (ex: temps passé, pièces utilisées...)"
                 />
               </div>
             </div>

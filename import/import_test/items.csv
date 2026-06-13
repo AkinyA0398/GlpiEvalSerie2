@@ -1,0 +1,61 @@
+Name,Status,Location,Manufacturer,Item_Type,Model,Inventory_Number,User
+PC-ADM-001,En production,Administration,Dell,Computer,OptiPlex 7010,ITU-2026-0001,Rakoto Jean
+PC-ADM-002,En production,Administration,HP,Computer,ProDesk 400 G9,ITU-2026-0002,Rasoanaivo Marie
+PC-COMPTA-001,En production,Comptabilité,Lenovo,Computer,ThinkCentre M70,ITU-2026-0003,Rakotondranaivo Paul
+PC-COMPTA-002,Maintenance,Comptabilité,Dell,Computer,OptiPlex 7020,ITU-2026-0004,Rabe Hanitra
+PC-LAB-001,En production,Laboratoire IA,HP,Computer,EliteDesk 800 G8,ITU-2026-0005,ITU Labs
+PC-LAB-002,En production,Laboratoire IA,Lenovo,Computer,ThinkCentre M75,ITU-2026-0006,ITU Labs
+PC-LAB-003,En production,Laboratoire IA,Dell,Computer,OptiPlex 7090,ITU-2026-0007,ITU Labs
+PC-BIB-001,En production,Bibliothèque,HP,Computer,ProDesk 600 G6,ITU-2026-0008,Bibliothèque
+PC-FORM-001,En stock,Magasin Informatique,Lenovo,Computer,ThinkCentre Neo 50,ITU-2026-0009,
+MN-FORM-002,En panne,Salle 301,Dell,Monitor,AC1000,ITU-2026-0010,Rakoto Michel
+PC-ADM-003,Hors service,Administration,Apple,Computer,Mac mini M2,ITU-2026-0011,Randrianasolo Eric
+PC-COMPTA-003,En production,Comptabilité,Asus,Computer,Latitude 5420,ITU-2026-0012,
+TL-LAB-001,En production,Laboratoire IA,Cisco,Phone,IP Phone 7841,ITU-2026-0013,ITU Labs
+TL-ADM-001,En production,Administration,Yealink,Phone,Yealink T46S,ITU-2026-0014,Rasoanaivo Marie
+MN-BIB-001,Maintenance,Bibliothèque,HP,Monitor,P2419H,ITU-2026-0015,Bibliothèque
+PC-LAB-004,En production,Laboratoire IA,Dell,Computer,OptiPlex 7010,ITU-2026-0016,ITU Labs
+PC-COMPTA-004,En panne,Comptabilité,Lenovo,Computer,ThinkCentre M70,ITU-2026-0017,Rakotondranaivo Paul
+MN-ADM-001,En production,Administration,Dell,Monitor,AC1000,ITU-2026-0018,Rakoto Jean
+PC-FORM-002,En stock,Magasin Informatique,HP,Computer,ProDesk 400 G9,ITU-2026-0019,
+PC-BIB-002,Maintenance,Bibliothèque,Lenovo,Computer,ThinkCentre M75,ITU-2026-0020,
+TL-COMPTA-001,En production,Comptabilité,Grandstream,Phone,Grandstream GXP2170,ITU-2026-0021,Rabe Hanitra
+PC-LAB-005,En production,Laboratoire IA,Apple,Computer,Mac mini M2,ITU-2026-0022,ITU Labs
+MN-FORM-003,En stock,Magasin Informatique,Asus,Monitor,E2220H,ITU-2026-0023,
+PC-ADM-004,Hors service,Administration,Dell,Computer,Latitude 5420,ITU-2026-0024,Tsiresy Rivo
+TL-BIB-001,En production,Bibliothèque,Cisco,Phone,IP Phone 7841,ITU-2026-0025,
+PC-COMPTA-005,En production,Comptabilité,HP,Computer,EliteDesk 800 G8,ITU-2026-0026,Randrianasolo Eric
+MN-LAB-001,En production,Laboratoire IA,Lenovo,Monitor,ProArt PA278QV,ITU-2026-0027,ITU Labs
+PC-FORM-003,En panne,Magasin Informatique,Asus,Computer,ProDesk 600 G6,ITU-2026-0028,
+TL-FORM-001,En stock,Magasin Informatique,Yealink,Phone,Yealink T46S,ITU-2026-0029,
+PC-BIB-003,En production,Bibliothèque,Dell,Computer,OptiPlex 7090,ITU-2026-0030,Bibliothèque
+PC-ADM-005,En production,Administration,Lenovo,Computer,ThinkCentre Neo 50,ITU-2026-0031,Rakoto Jean
+MN-COMPTA-001,Maintenance,Comptabilité,HP,Monitor,P2419H,ITU-2026-0032,Rasoanaivo Marie
+PC-LAB-006,En production,Laboratoire IA,Dell,Computer,OptiPlex 7020,ITU-2026-0033,ITU Labs
+TL-ADM-002,En production,Administration,Grandstream,Phone,Grandstream GXP2170,ITU-2026-0034,
+PC-COMPTA-006,Hors service,Comptabilité,Apple,Computer,Mac mini M2,ITU-2026-0035,Rakotondranaivo Paul
+MN-ADM-002,En production,Administration,Asus,Monitor,UltraSharp U2723QE,ITU-2026-0036,Rakoto Jean
+PC-FORM-004,En stock,Magasin Informatique,Lenovo,Computer,ThinkCentre M70,ITU-2026-0037,
+PC-BIB-004,En panne,Bibliothèque,HP,Computer,ProDesk 400 G9,ITU-2026-0038,
+TL-LAB-002,En production,Laboratoire IA,Cisco,Phone,IP Phone 7841,ITU-2026-0039,ITU Labs
+PC-ADM-006,En production,Administration,Dell,Computer,OptiPlex 7010,ITU-2026-0040,Randrianasolo Eric
+MN-LAB-002,Maintenance,Laboratoire IA,Dell,Monitor,AC1000,ITU-2026-0041,
+PC-COMPTA-007,En production,Comptabilité,HP,Computer,EliteDesk 800 G8,ITU-2026-0042,Rabe Hanitra
+TL-FORM-002,En stock,Magasin Informatique,Yealink,Phone,Yealink T46S,ITU-2026-0043,
+PC-LAB-007,En production,Laboratoire IA,Lenovo,Computer,ThinkCentre M75,ITU-2026-0044,ITU Labs
+PC-BIB-005,En production,Bibliothèque,Asus,Computer,Latitude 5420,ITU-2026-0045,Bibliothèque
+MN-FORM-004,En panne,Magasin Informatique,HP,Monitor,E2220H,ITU-2026-0046,
+PC-ADM-007,En production,Administration,Apple,Computer,Mac mini M2,ITU-2026-0047,Rakoto Jean
+TL-COMPTA-002,En production,Comptabilité,Grandstream,Phone,Grandstream GXP2170,ITU-2026-0048,
+PC-COMPTA-008,Maintenance,Comptabilité,Dell,Computer,OptiPlex 7090,ITU-2026-0049,Randrianasolo Eric
+MN-ADM-003,En production,Administration,Lenovo,Monitor,ProArt PA278QV,ITU-2026-0050,Rasoanaivo Marie
+PC-FORM-005,En stock,Magasin Informatique,HP,Computer,ProDesk 600 G6,ITU-2026-0051,
+PC-LAB-008,En production,Laboratoire IA,Dell,Computer,OptiPlex 7010,ITU-2026-0052,ITU Labs
+TL-BIB-002,En production,Bibliothèque,Cisco,Phone,IP Phone 7841,ITU-2026-0053,
+PC-BIB-006,En panne,Bibliothèque,Lenovo,Computer,ThinkCentre Neo 50,ITU-2026-0054,
+PC-ADM-008,Hors service,Administration,Asus,Computer,ProDesk 400 G9,ITU-2026-0055,Tsiresy Rivo
+MN-COMPTA-002,Maintenance,Comptabilité,Dell,Monitor,UltraSharp U2723QE,ITU-2026-0056,Rakotondranaivo Paul
+PC-COMPTA-009,En production,Comptabilité,HP,Computer,EliteDesk 800 G8,ITU-2026-0057,Rabe Hanitra
+TL-LAB-003,En production,Laboratoire IA,Yealink,Phone,Yealink T46S,ITU-2026-0058,ITU Labs
+PC-LAB-009,En production,Laboratoire IA,Lenovo,Computer,ThinkCentre M70,ITU-2026-0059,ITU Labs
+PC-FORM-006,En stock,Magasin Informatique,Dell,Computer,OptiPlex 7020,ITU-2026-0060,

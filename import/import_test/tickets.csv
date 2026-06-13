@@ -1,0 +1,101 @@
+Ref_Ticket,Date,Heure,Type,Titre,Description,Status,Priority,Items
+1,10/03/2026,09:23,Incident,Problème de démarrage,PC ne s'allume pas,Closed,High,"[""PC-ADM-001"",""MN-BIB-001"",""MN-COMPTA-001""]"
+2,12/03/2026,11:45,Demande,Mise à jour nécessaire,Passer à Windows 11,In progress,Medium,"[""PC-LAB-001"",""PC-FORM-003""]"
+3,15/03/2026,14:10,Incident,Réseau lent,Connexion très lente,New,Low,"[""PC-COMPTA-001"",""PC-COMPTA-002"",""MN-FORM-002"",""PC-LAB-007""]"
+4,18/03/2026,08:30,Incident,Écran noir,Plus d'affichage,Closed,High,"[""MN-FORM-002"",""PC-LAB-005""]"
+5,20/03/2026,13:20,Demande,Nouveau logiciel,Installer comptabilité,In progress,Medium,[]
+6,22/03/2026,10:05,Incident,Clavier défectueux,Touches qui ne répondent pas,New,Low,"[""MN-BIB-001"",""PC-FORM-004"",""PC-FORM-005"",""PC-LAB-009""]"
+7,25/03/2026,16:15,Incident,Virus suspect,Message antivirus,Closed,High,"[""PC-LAB-005"",""MN-LAB-001"",""TL-COMPTA-002""]"
+8,28/03/2026,09:45,Demande,Accès distant,Configurer VPN,In progress,Medium,"[""MN-ADM-001"",""PC-COMPTA-005"",""PC-LAB-006"",""PC-ADM-008""]"
+9,01/04/2026,12:30,Incident,Imprimante bloquée,Le document ne sort pas,New,Low,[]
+10,03/04/2026,15:00,Incident,Plus de son,Pas de sortie audio,Closed,Medium,"[""PC-LAB-006""]"
+11,05/04/2026,08:50,Demande,Transfert de données,Copier 50 Go vers serveur,In progress,High,"[""PC-ADM-002"",""PC-ADM-006"",""PC-LAB-008""]"
+12,07/04/2026,10:20,Incident,Mot de passe oublié,Utilisateur ne peut plus se connecter,New,Medium,"[""PC-ADM-003"",""PC-FORM-002"",""TL-BIB-001""]"
+13,09/04/2026,14:45,Incident,Logiciel qui plante,Comptabilité se ferme,Closed,High,"[""PC-COMPTA-007"",""MN-ADM-003"",""PC-FORM-006""]"
+14,11/04/2026,09:10,Demande,Nouvelle installation,Installer Photoshop,In progress,Medium,[]
+15,13/04/2026,11:35,Incident,Écran noir,Le moniteur s'éteint aléatoirement,New,Low,"[""MN-ADM-002""]"
+16,15/04/2026,13:55,Incident,Réseau coupé,Plus de réseau,Closed,High,"[""TL-COMPTA-002"",""PC-FORM-005"",""TL-ADM-001"",""PC-BIB-002""]"
+17,17/04/2026,08:20,Demande,Changer mot de passe,Forcer changement,In progress,Medium,[]
+18,19/04/2026,10:40,Incident,Souris inopérante,Curseur bloqué,New,Low,"[""PC-LAB-003"",""MN-FORM-003"",""MN-LAB-002""]"
+19,21/04/2026,14:30,Incident,Problème de son,Création compte admin,Closed,High,"[""PC-FORM-002"",""PC-BIB-006"",""PC-FORM-001""]"
+20,23/04/2026,09:00,Demande,Mise à jour antivirus,Programmer scan,In progress,Medium,[]
+21,25/04/2026,11:15,Incident,Écran figé,Plusieurs fenêtres ouvertes,New,Low,"[""PC-BIB-003"",""PC-ADM-007"",""TL-LAB-003""]"
+22,27/04/2026,15:40,Incident,Clavier AZERTY en QWERTY,Agencement clavier,Closed,High,"[""MN-COMPTA-002"",""PC-COMPTA-003""]"
+23,29/04/2026,08:55,Demande,Installation logiciel de visio,Zoom requis,In progress,Medium,"[""MN-FORM-003"",""PC-LAB-007"",""PC-LAB-004"",""PC-ADM-005""]"
+24,02/05/2026,12:10,Incident,Problème d'impression,Rien ne s'imprime,New,Low,[]
+25,04/05/2026,14:50,Incident,PC qui redémarre en boucle,Boot loop,Closed,High,"[""PC-BIB-001"",""TL-LAB-002"",""TL-BIB-002""]"
+26,06/05/2026,09:30,Demande,Accès partage réseau,Droits en lecture seule,In progress,Medium,"[""TL-LAB-003""]"
+27,08/05/2026,11:05,Incident,Clavier numérique ne fonctionne pas,Pavé inactif,New,Low,"[""PC-COMPTA-003"",""TL-FORM-001"",""PC-BIB-005"",""PC-COMPTA-009""]"
+28,10/05/2026,15:20,Incident,Ventilateur bruyant,Bruit anormal,Closed,High,"[""TL-FORM-001"",""MN-FORM-004"",""PC-COMPTA-002""]"
+29,12/05/2026,08:45,Demande,Changer fond d'écran,Personnalisation,In progress,Medium,[]
+30,14/05/2026,10:15,Incident,Plus d'accès Internet,Wi-Fi désactivé,New,Low,"[""MN-COMPTA-001"",""TL-FORM-002"",""MN-ADM-003"",""PC-COMPTA-004""]"
+31,16/05/2026,13:25,Incident,Logiciel de compta bloque au démarrage,Erreur licence,Closed,High,"[""MN-ADM-003"",""TL-COMPTA-001"",""PC-COMPTA-006""]"
+32,18/05/2026,09:50,Demande,Nouvelle imprimante,Configurer réseau,In progress,Medium,"[""PC-LAB-004"",""PC-LAB-008"",""PC-ADM-002"",""PC-COMPTA-008"",""PC-FORM-006""]"
+33,20/05/2026,14:05,Incident,USB non reconnu,Port HS,New,Low,[]
+34,22/05/2026,11:40,Incident,Écran tactile inopérant,Ne répond plus,Closed,High,"[""PC-FORM-004"",""PC-LAB-001""]"
+35,24/05/2026,15:55,Demande,Changement de souris,Fournir souris filaire,In progress,Medium,"[""PC-ADM-004"",""PC-COMPTA-007"",""PC-ADM-008"",""PC-ADM-003""]"
+36,26/05/2026,08:10,Incident,Ordinateur lent à l'ouverture des sessions,Long délai,New,Low,"[""PC-COMPTA-008"",""PC-ADM-008"",""PC-COMPTA-005""]"
+37,28/05/2026,12:30,Incident,Problème de synchronisation calendrier,Outlook ne sync pas,Closed,High,[]
+38,30/05/2026,14:45,Demande,Augmenter mémoire RAM,Demande matériel,In progress,Medium,"[""PC-LAB-002"",""PC-BIB-004"",""PC-ADM-007""]"
+39,01/06/2026,09:20,Incident,Écran bleu,Crash systématique,New,Low,"[""MN-LAB-002"",""MN-ADM-001"",""TL-ADM-002"",""PC-LAB-009""]"
+40,03/06/2026,10:50,Incident,Impossible d'envoyer mail,Serveur SMTP refuse,Closed,High,"[""TL-COMPTA-001"",""PC-COMPTA-009"",""PC-BIB-001""]"
+41,05/06/2026,13:15,Demande,Installer navigateur alternatif,Firefox,In progress,Medium,[]
+42,07/06/2026,15:40,Incident,Clavier qui double les touches,Tape plusieurs caractères,New,Low,"[""PC-FORM-001"",""TL-LAB-001"",""MN-LAB-001"",""MN-ADM-002"",""PC-LAB-008""]"
+43,09/06/2026,08:35,Incident,Réseau non détecté,Carte réseau désactivée,Closed,High,"[""TL-LAB-001"",""TL-LAB-002"",""MN-FORM-004""]"
+44,11/06/2026,11:00,Demande,Rétrocession de licence,Libérer licence Adobe,In progress,Medium,[]
+45,13/06/2026,14:25,Incident,Problème de charge batterie,Ne se charge plus,New,Low,"[""PC-ADM-007"",""PC-ADM-001"",""PC-FORM-005"",""TL-BIB-001""]"
+46,15/06/2026,09:55,Incident,Microphone ne fonctionne pas,Aucun son capté,Closed,High,"[""TL-ADM-001"",""PC-FORM-006"",""PC-BIB-002"",""PC-LAB-007"",""PC-BIB-003""]"
+47,17/06/2026,12:20,Demande,Support équipe distante,Accès TeamViewer,In progress,Medium,[]
+48,19/06/2026,10:05,Incident,Écran qui scintille,Problème de fréquence,New,Low,"[""PC-FORM-003"",""PC-BIB-006"",""PC-COMPTA-003""]"
+49,21/06/2026,15:30,Incident,Plantage navigateur,Chrome se ferme seul,Closed,High,"[""TL-FORM-002"",""TL-BIB-002"",""PC-LAB-003""]"
+50,23/06/2026,08:45,Demande,Nettoyage ordinateur,Poussière excessive,In progress,Medium,[]
+51,25/06/2026,11:10,Incident,Clavier et souris déconnectés,Plus de périphériques,New,Low,"[""PC-COMPTA-004"",""PC-ADM-005"",""PC-ADM-006"",""MN-COMPTA-002""]"
+52,27/06/2026,13:35,Incident,Plus de son sur casque,Pris jack défectueux,Closed,High,"[""TL-BIB-001"",""PC-ADM-005"",""TL-COMPTA-002"",""MN-BIB-001""]"
+53,29/06/2026,09:00,Demande,Changement d'adresse IP,Fixe demandée,In progress,Medium,[]
+54,01/07/2026,14:20,Incident,Bloqué sur écran de connexion,Ne passe pas,New,Low,"[""PC-LAB-009"",""PC-LAB-002"",""PC-COMPTA-007""]"
+55,03/07/2026,10:45,Incident,Virus ransomware détecté,Chiffrement suspect,Closed,High,"[""PC-ADM-001"",""MN-FORM-002"",""PC-ADM-004"",""TL-ADM-002"",""PC-ADM-008""]"
+56,05/07/2026,12:50,Demande,Backup quotidien,Configurer sauvegarde,In progress,Medium,[]
+57,07/07/2026,15:15,Incident,Écran externe non reconnu,HDMI inactive,New,Low,"[""PC-COMPTA-002"",""PC-BIB-004"",""PC-COMPTA-009""]"
+58,09/07/2026,08:25,Incident,Problème d'alimentation,Ne s'allume que sur batterie,Closed,High,"[""PC-COMPTA-005"",""TL-ADM-002"",""MN-LAB-002"",""PC-FORM-002"",""PC-FORM-006""]"
+59,11/07/2026,11:40,Demande,Installation logiciel RH,Logiciel paie,In progress,Medium,[]
+60,13/07/2026,14:55,Incident,Ordinateur surchauffe,Ventilateur en continu,New,Low,"[""TL-COMPTA-002"",""PC-ADM-002"",""TL-LAB-003""]"
+61,15/07/2026,09:30,Incident,Impossible d'imprimer en couleur,Toujours monochrome,Closed,High,"[""PC-LAB-005"",""MN-COMPTA-002"",""PC-ADM-003"",""PC-COMPTA-006""]"
+62,17/07/2026,12:05,Demande,Création de dossier partagé,Droits spécifiques,In progress,Medium,[]
+63,19/07/2026,15:20,Incident,Problème de wifi instable,Se déconnecte sans arrêt,New,Low,"[""PC-COMPTA-006"",""PC-BIB-005"",""MN-ADM-003"",""PC-LAB-004""]"
+64,21/07/2026,08:40,Incident,Plus de batterie,Charge à 0%,Closed,High,"[""PC-BIB-005"",""TL-LAB-003"",""TL-COMPTA-001"",""TL-LAB-002""]"
+65,23/07/2026,10:55,Demande,Changement clavier AZERTY,Fournir clavier,In progress,Medium,[]
+66,25/07/2026,13:10,Incident,Clavier rétro-éclairé ne fonctionne pas,Lumière éteinte,New,Low,"[""PC-COMPTA-003"",""PC-COMPTA-008"",""MN-COMPTA-001"",""MN-LAB-001""]"
+67,27/07/2026,15:45,Incident,Problème de licence Windows,Message activation,Closed,High,"[""PC-BIB-004"",""MN-ADM-003"",""PC-FORM-001"",""MN-ADM-001""]"
+68,29/07/2026,09:15,Demande,Réinstallation OS,Windows défectueux,In progress,Medium,[]
+69,31/07/2026,11:30,Incident,Logiciel antivirus obsolète,Base de données ancienne,New,Low,"[""PC-LAB-007"",""TL-ADM-001"",""PC-LAB-009""]"
+70,02/08/2026,14:05,Incident,Écran bleu après mise à jour,Driver incompatible,Closed,High,"[""PC-LAB-002"",""PC-BIB-006"",""PC-BIB-002"",""PC-FORM-004""]"
+71,04/08/2026,16:20,Demande,Augmentation espace disque,Disque plein,In progress,Medium,[]
+72,06/08/2026,09:50,Incident,Port USB défectueux,Ne détecte rien,New,Low,"[""TL-COMPTA-001"",""MN-ADM-002"",""PC-ADM-007"",""PC-LAB-001"",""TL-FORM-001""]"
+73,08/08/2026,12:25,Incident,Problème d'impression recto-verso,Imprime toujours simple face,Closed,High,"[""PC-BIB-003"",""MN-LAB-002"",""PC-LAB-005"",""PC-FORM-005""]"
+74,10/08/2026,14:40,Demande,Configurer messagerie sur mobile,Exchange,In progress,Medium,[]
+75,12/08/2026,08:15,Incident,Ordinateur très lent en multitâche,Manque de RAM,New,Low,"[""PC-FORM-005"",""TL-LAB-001"",""PC-FORM-003""]"
+76,14/08/2026,10:50,Incident,Problème de zoom sur écran,Affichage déformé,Closed,High,"[""MN-BIB-001"",""PC-ADM-008"",""PC-COMPTA-001"",""TL-FORM-002"",""PC-FORM-006""]"
+77,16/08/2026,13:05,Demande,Suppression de compte utilisateur,Ancien employé,In progress,Medium,[]
+78,18/08/2026,15:30,Incident,Plus d'accès au serveur de fichiers,Erreur réseau,New,Low,"[""PC-FORM-001"",""PC-ADM-004"",""MN-FORM-004"",""PC-LAB-008""]"
+79,20/08/2026,08:55,Incident,Bug sur logiciel métier,Calculs faux,Closed,High,"[""PC-FORM-004"",""PC-COMPTA-008"",""MN-FORM-002"",""PC-COMPTA-009"",""TL-BIB-001""]"
+80,22/08/2026,11:20,Demande,Migration de données vers nouveau PC,Transfert profil,In progress,Medium,[]
+81,24/08/2026,14:45,Incident,Écran tactile fissuré,Remplacement écran,New,Low,"[""PC-ADM-003"",""TL-ADM-002"",""PC-COMPTA-007"",""TL-BIB-002""]"
+82,26/08/2026,09:10,Incident,Problème de carte graphique,Artefacts à l'écran,Closed,High,"[""PC-BIB-002"",""PC-LAB-008"",""PC-LAB-003"",""PC-LAB-006"",""TL-COMPTA-002""]"
+83,28/08/2026,11:35,Demande,Installer pack Office,Licence déjà achetée,In progress,Medium,[]
+84,30/08/2026,14:00,Incident,Le PC ne s'endort plus,Veille bloquée,New,Low,"[""PC-COMPTA-007"",""PC-COMPTA-004"",""PC-FORM-006""]"
+85,01/09/2026,16:25,Incident,Imprimante affiche erreur papier,Jamme papier,Closed,High,"[""MN-ADM-001"",""PC-FORM-006"",""MN-FORM-003"",""PC-LAB-007"",""PC-BIB-001""]"
+86,03/09/2026,08:40,Demande,Changement de fond d'écran sur plusieurs PC,Standardisation,In progress,Medium,[]
+87,05/09/2026,11:05,Incident,Problème de connexion VPN,Authentification refuse,New,Low,"[""MN-LAB-001"",""PC-COMPTA-006"",""PC-ADM-006"",""PC-FORM-002"",""PC-BIB-006""]"
+88,07/09/2026,13:30,Incident,Clavier sans fil non appairé,Perte liaison,Closed,High,"[""TL-LAB-002"",""PC-COMPTA-009"",""PC-ADM-002"",""PC-FORM-003"",""PC-BIB-005""]"
+89,09/09/2026,15:55,Demande,Audit de sécurité,Scan des vulnérabilités,In progress,Medium,[]
+90,11/09/2026,09:20,Incident,Problème d'heure système,Se remet à l'ancienne,New,Low,"[""MN-FORM-004"",""TL-ADM-001"",""PC-ADM-005""]"
+91,13/09/2026,11:45,Incident,Logiciel de visio sans son,Micro désactivé,Closed,High,"[""PC-COMPTA-001"",""PC-ADM-007"",""PC-LAB-004"",""MN-ADM-003"",""PC-COMPTA-005""]"
+92,15/09/2026,14:10,Demande,Récupération de fichiers supprimés,Corbeille vidée,In progress,Medium,[]
+93,17/09/2026,16:35,Incident,Écran secondaire clignote,Problème câble,New,Low,"[""PC-FORM-002"",""MN-ADM-002"",""PC-COMPTA-008"",""TL-LAB-003""]"
+94,19/09/2026,08:00,Incident,Plus d'alimentation sur prise USB,Port HS,Closed,High,"[""PC-ADM-005"",""TL-BIB-002"",""MN-LAB-001"",""PC-COMPTA-007"",""PC-COMPTA-003""]"
+95,21/09/2026,10:25,Demande,Changer mot de passe session,Expiré,In progress,Medium,[]
+96,23/09/2026,12:50,Incident,Problème de démarrage après MAJ,Échec démarrage,New,High,"[""PC-LAB-009"",""TL-BIB-001"",""TL-FORM-002"",""MN-ADM-001""]"
+97,24/09/2026,09:15,Demande,Transfert de données,Backup utilisateur,In progress,Medium,"[""PC-BIB-002"",""PC-BIB-004"",""PC-COMPTA-002"",""PC-FORM-005"",""MN-FORM-004""]"
+98,25/09/2026,14:45,Incident,Réseau coupé,Pas d'accès Internet,Closed,High,[]
+99,26/09/2026,08:30,Incident,Clavier défectueux,Touches collées,New,Low,"[""PC-BIB-005"",""PC-COMPTA-004"",""PC-BIB-003""]"
+100,27/09/2026,11:00,Demande,Mise à jour Windows,Programmer mise à jour,In progress,Medium,"[""PC-LAB-009"",""PC-ADM-004"",""TL-LAB-001"",""MN-COMPTA-001"",""MN-COMPTA-002""]"

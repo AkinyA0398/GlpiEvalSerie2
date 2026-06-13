@@ -261,7 +261,7 @@ export const createGlpiCustomStatus = async (statusName, options = {}) => {
         // 1 = Oui, 0 = Non. Par défaut, on peut les mettre à 1 pour qu'ils soient partout.
         is_visible_computer: options.isComputer !== false ? 1 : 0,
         is_visible_monitor: options.isMonitor !== false ? 1 : 0,
-        is_visible_peripheral: options.isPeripheral !== false ? 1 : 0,
+        is_visible_Phone: options.isPhone !== false ? 1 : 0,
         is_visible_phone: options.isPhone !== false ? 1 : 0,
         is_visible_networkequipment: options.isNetwork !== false ? 1 : 0,
       }
@@ -278,13 +278,27 @@ export const createGlpiCustomStatus = async (statusName, options = {}) => {
     throw error;
   }
 };
-export const linkItemToTicket = async (ticketId, itemType, itemId) => {
+export const linkItemToTicket = async (ticketId, itemType, itemId, options = {}) => {
+  const { skipForbidden = true } = options;
+
+  // Normalisation minimale côté client (sécurise contre les types mal orthographiés venant du CSV)
+  const normalizedItemType = (() => {
+    const s = String(itemType ?? '').trim();
+    const lower = s.toLowerCase();
+    const map = {
+      computer: 'Computer',
+      monitor: 'Monitor',
+      phone: 'Phone'
+    };
+    return map[lower] || (s.charAt(0).toUpperCase() + s.slice(1));
+  })();
+
   try {
     const payload = {
       input: [
         {
           tickets_id: parseInt(ticketId, 10),
-          itemtype: itemType,
+          itemtype: normalizedItemType,
           items_id: parseInt(itemId, 10)
         }
       ]
@@ -295,7 +309,21 @@ export const linkItemToTicket = async (ticketId, itemType, itemId) => {
       body: JSON.stringify(payload)
     });
   } catch (error) {
-    console.error(`Erreur liaison ticket ${ticketId} avec ${itemType} ID ${itemId} :`, error);
+    const msg = String(error?.message || error || '');
+    const isForbidden = msg.includes('ERROR_GLPI_ADD') && msg.toLowerCase().includes('droits');
+
+    if (isForbidden && skipForbidden) {
+      console.warn(
+        `⚠️ Droits insuffisants pour lier Ticket #${ticketId} <-> ${normalizedItemType} #${itemId}. ` +
+        `Liaison ignorée. Endpoint=Item_Ticket. Payload=${JSON.stringify({ tickets_id: parseInt(ticketId, 10), itemtype: normalizedItemType, items_id: parseInt(itemId, 10) })}`
+      );
+      // utile au debug sans casser l'import
+      console.debug(`GLPI error text: ${msg}`);
+      return null;
+    }
+
+    console.error(`Erreur liaison ticket ${ticketId} avec ${normalizedItemType} ID ${itemId} :`, error);
+    throw error;
   }
 };
 export const deleteGlpiTicket = async (ticketId) => {

@@ -64,7 +64,7 @@ const FormulaireSquelette = () => {
             <option value="Computer">Computer (Ordinateur)</option>
             <option value="Monitor">Monitor (Écran)</option>
             <option value="NetworkEquipment">NetworkEquipment (Réseau)</option>
-            <option value="Peripheral">Peripheral (Périphérique)</option>
+            <option value="Phone">Phone (Périphérique)</option>
           </select>
         </div>
 
