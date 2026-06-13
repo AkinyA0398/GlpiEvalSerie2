@@ -30,18 +30,18 @@ const styles = {
   page: {
     minHeight: 'calc(100vh - 60px)',
     padding: '28px 18px',
-    background: 'linear-gradient(180deg, #121212 0%, #1e1e1e 100%)',
-    fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
-    color: '#f8fafc'
+    backgroundColor: '#F8F9FC',
+    fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
+    color: '#1A1D2E'
   },
   card: {
     maxWidth: '980px',
     margin: '0 auto',
-    background: '#121212',
-    border: '1px solid #334155',
-    borderRadius: '12px',
-    padding: '22px',
-    boxShadow: '0 10px 30px rgba(0,0,0,0.35)'
+    backgroundColor: '#FFFFFF',
+    border: '1px solid #E2E6EF',
+    borderRadius: '14px',
+    padding: '24px',
+    boxShadow: '0 2px 12px rgba(26, 29, 46, 0.05)'
   },
   titleRow: {
     display: 'flex',
@@ -51,26 +51,28 @@ const styles = {
     marginBottom: '18px'
   },
   title: {
-    fontSize: '20px',
+    fontSize: '24px',
     fontWeight: 800,
-    color: '#00d2ff' // Accent bleu ciel professionnel appliqué au titre principal
+    color: '#1A1D2E',
+    letterSpacing: '-0.02em'
   },
   subtitle: {
     marginTop: 6,
-    fontSize: '13px',
-    color: '#cbd5e1'
+    fontSize: '14px',
+    color: '#8B92A8'
   },
   confirmBox: {
-    border: '1px dashed #334155',
+    border: '1px dashed #E2E6EF',
     borderRadius: '10px',
     padding: '16px',
     marginBottom: '14px',
-    background: 'rgba(56, 189, 248, 0.02)'
+    backgroundColor: '#F8F9FC'
   },
   confirmText: {
     fontSize: '14px',
-    color: '#cbd5e1',
-    lineHeight: 1.5
+    color: '#5A6178',
+    lineHeight: 1.5,
+    fontWeight: 500
   },
   actionWrap: {
     marginTop: 12

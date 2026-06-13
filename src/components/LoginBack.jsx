@@ -14,7 +14,7 @@ const LoginBack = () => {
       ...formData,
       [name]: value
     });
-    if (error) setError(false); // Réinitialise l'erreur dès que l'utilisateur saisit à nouveau
+    if (error) setError(false); // Reinitialise l'erreur des que l'utilisateur saisit a nouveau
   };
 
   const handleSubmit = (e) => {
@@ -32,27 +32,28 @@ const LoginBack = () => {
     <div style={styles.page}>
       <div style={styles.container}>
         <div style={styles.header}>
-          <h2 style={styles.title}>GLPI Admin</h2>
-          <p style={styles.subtitle}>Authentification requise pour l'accès au Backoffice</p>
+          <div style={styles.brand}>GLPI</div>
+          <h2 style={styles.title}>Administration</h2>
+          <p style={styles.subtitle}>Authentification requise pour l'acces au Backoffice</p>
         </div>
         
         {error && (
           <div style={styles.alertError}>
-            Code d'accès administrateur invalide.
+            Code d'acces administrateur invalide.
           </div>
         )}
 
         <form onSubmit={handleSubmit} style={styles.form}>
-          {/* Champ unique : Clé d'accès */}
+          {/* Champ unique : Cle d'acces */}
           <div style={styles.inputGroup}>
-            <label htmlFor="nom" style={styles.label}>Clé d'accès unique :</label>
+            <label htmlFor="nom" style={styles.label}>Cle d'acces unique :</label>
             <input
               type="password"
               id="nom"
               name="nom"
               value={formData.nom}
               onChange={handleChange}
-              placeholder="••••••••••••"
+              placeholder="Entrez votre cle d'acces"
               required
               style={styles.input}
             />
@@ -60,7 +61,7 @@ const LoginBack = () => {
 
           {/* Bouton de soumission */}
           <button type="submit" style={styles.button}>
-            Se connecter au terminal
+            Se connecter
           </button>
         </form>
       </div>
@@ -70,50 +71,59 @@ const LoginBack = () => {
 
 const styles = {
   page: {
-    backgroundColor: '#121212',
+    background: 'linear-gradient(145deg, #F8F9FC 0%, #EEF0F7 100%)',
     minHeight: '100vh',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
+    fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
     padding: '20px',
     boxSizing: 'border-box'
   },
   container: {
-    maxWidth: '400px',
+    maxWidth: '420px',
     width: '100%',
-    backgroundColor: '#1e1e1e',
-    border: '1px solid #334155',
-    borderRadius: '8px',
-    padding: '32px',
-    boxSizing: 'border-box'
+    backgroundColor: '#FFFFFF',
+    border: '1px solid #E2E6EF',
+    borderRadius: '16px',
+    padding: '40px',
+    boxSizing: 'border-box',
+    boxShadow: '0 8px 32px rgba(26, 29, 46, 0.1)'
   },
   header: {
     textAlign: 'center',
-    marginBottom: '24px'
+    marginBottom: '28px'
+  },
+  brand: {
+    fontSize: '14px',
+    fontWeight: '800',
+    color: '#4338CA',
+    textTransform: 'uppercase',
+    letterSpacing: '2px',
+    marginBottom: '8px'
   },
   title: {
     margin: '0 0 6px 0',
-    fontSize: '22px',
-    fontWeight: '700',
-    color: '#00d2ff',
-    letterSpacing: '0.5px'
+    fontSize: '24px',
+    fontWeight: '800',
+    color: '#1A1D2E',
+    letterSpacing: '-0.02em'
   },
   subtitle: {
     margin: 0,
     fontSize: '13px',
-    color: '#cbd5e1',
+    color: '#8B92A8',
     lineHeight: '1.4'
   },
   alertError: {
-    padding: '10px 12px',
-    borderRadius: '6px',
+    padding: '10px 14px',
+    borderRadius: '10px',
     marginBottom: '20px',
-    fontSize: '12px',
+    fontSize: '13px',
     fontWeight: '600',
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-    border: '1px solid #ef4444',
-    color: '#ef4444',
+    backgroundColor: 'rgba(220, 38, 38, 0.06)',
+    border: '1px solid rgba(220, 38, 38, 0.2)',
+    color: '#DC2626',
     textAlign: 'center'
   },
   form: {
@@ -129,35 +139,35 @@ const styles = {
   label: {
     fontSize: '12px',
     fontWeight: '600',
-    color: '#cbd5e1',
+    color: '#5A6178',
     textTransform: 'uppercase',
     letterSpacing: '0.5px'
   },
   input: {
     width: '100%',
-    padding: '12px',
+    padding: '12px 14px',
     fontSize: '14px',
-    backgroundColor: '#121212',
-    border: '1px solid #334155',
-    borderRadius: '6px',
-    color: '#f8fafc',
+    backgroundColor: '#F8F9FC',
+    border: '1px solid #E2E6EF',
+    borderRadius: '10px',
+    color: '#1A1D2E',
     boxSizing: 'border-box',
     outline: 'none',
-    fontFamily: 'monospace',
+    fontFamily: "'Inter', system-ui, sans-serif",
     transition: 'border-color 0.2s'
   },
   button: {
     width: '100%',
-    padding: '12px',
+    padding: '13px',
     fontSize: '14px',
     fontWeight: '700',
-    backgroundColor: '#00d2ff',
-    color: '#121212',
+    backgroundColor: '#4338CA',
+    color: '#FFFFFF',
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: '10px',
     cursor: 'pointer',
     transition: 'background 0.2s',
-    letterSpacing: '0.5px'
+    letterSpacing: '-0.01em'
   }
 };
 

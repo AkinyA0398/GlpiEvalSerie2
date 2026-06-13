@@ -453,25 +453,25 @@ for (const type in devicesData.devicesByType) {
 };
 
 const styles = {
-  page: { backgroundColor: '#121212', color: '#f8fafc', fontFamily: 'system-ui, -apple-system, sans-serif', minHeight: '100vh', padding: '30px' },
+  page: { backgroundColor: '#F8F9FC', color: '#1A1D2E', fontFamily: "'Inter', system-ui, -apple-system, sans-serif", minHeight: '100vh', padding: '30px' },
   header: { marginBottom: '32px' },
-  mainTitle: { fontSize: '24px', fontWeight: '700', color: '#00d2ff', margin: '0 0 8px 0' },
-  subtitle: { fontSize: '14px', color: '#cbd5e1', margin: 0 },
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '32px' },
-  card: { backgroundColor: '#1e1e1e', border: '1px solid #334155', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' },
-  cardHeader: { fontSize: '14px', fontWeight: '600', color: '#cbd5e1', borderBottom: '1px solid #334155', paddingBottom: '10px' },
-  inputWrapper: { display: 'flex', flexDirection: 'column', gap: '10px' },
+  mainTitle: { fontSize: '24px', fontWeight: '800', color: '#1A1D2E', margin: '0 0 8px 0', letterSpacing: '-0.02em' },
+  subtitle: { fontSize: '14px', color: '#8B92A8', margin: 0 },
+  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '32px' },
+  card: { backgroundColor: '#FFFFFF', border: '1px solid #E2E6EF', borderRadius: '14px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 2px 12px rgba(26, 29, 46, 0.05)' },
+  cardHeader: { fontSize: '15px', fontWeight: '800', color: '#1A1D2E', borderBottom: '1px solid #E2E6EF', paddingBottom: '12px', letterSpacing: '0.5px' },
+  inputWrapper: { display: 'flex', flexDirection: 'column', gap: '12px' },
   fileInput: { display: 'none' },
-  fileLabel: { display: 'block', textAlign: 'center', backgroundColor: 'transparent', border: '1px solid #334155', color: '#00d2ff', padding: '10px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', transition: 'all 0.2s' },
-  badgeSuccess: { backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', color: '#10b981', padding: '6px 12px', borderRadius: '4px', fontSize: '12px', textAlign: 'center', fontWeight: '600' },
+  fileLabel: { display: 'block', textAlign: 'center', backgroundColor: '#F8F9FC', border: '1px dashed #E2E6EF', color: '#4338CA', padding: '14px', borderRadius: '10px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', transition: 'all 0.2s', textTransform: 'uppercase', letterSpacing: '0.5px' },
+  badgeSuccess: { backgroundColor: 'rgba(5, 150, 105, 0.08)', border: '1px solid rgba(5, 150, 105, 0.25)', color: '#059669', padding: '8px 14px', borderRadius: '8px', fontSize: '13px', textAlign: 'center', fontWeight: '700' },
   actionSection: { display: 'flex', justifyContent: 'center', marginBottom: '32px' },
-  btnActive: { backgroundColor: '#00d2ff', color: '#121212', border: 'none', padding: '14px 40px', borderRadius: '6px', cursor: 'pointer', fontWeight: '700', fontSize: '15px', transition: 'background 0.2s', textTransform: 'uppercase', letterSpacing: '0.5px' },
-  btnDisabled: { backgroundColor: '#1e293b', color: '#64748b', border: '1px solid #334155', padding: '14px 40px', borderRadius: '6px', cursor: 'not-allowed', fontWeight: '700', fontSize: '15px' },
-  terminalContainer: { backgroundColor: '#121212', border: '1px solid #334155', borderRadius: '8px', padding: '20px', fontFamily: 'Consolas, Monaco, monospace' },
-  terminalHeader: { fontSize: '13px', fontWeight: '600', color: '#00d2ff', textTransform: 'uppercase', marginBottom: '14px', letterSpacing: '0.5px' },
-  terminalContent: { height: '260px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px' },
-  emptyLog: { color: '#64748b', fontSize: '13px', fontStyle: 'italic' },
-  logLine: { fontSize: '13px', color: '#cbd5e1', borderLeft: '2px solid #334155', paddingLeft: '8px', lineHeight: '1.4' }
+  btnActive: { backgroundColor: '#4338CA', color: '#FFFFFF', border: 'none', padding: '14px 40px', borderRadius: '10px', cursor: 'pointer', fontWeight: '800', fontSize: '15px', transition: 'background 0.2s', textTransform: 'uppercase', letterSpacing: '0.5px' },
+  btnDisabled: { backgroundColor: '#F1F3F9', color: '#8B92A8', border: '1px solid #E2E6EF', padding: '14px 40px', borderRadius: '10px', cursor: 'not-allowed', fontWeight: '800', fontSize: '15px', textTransform: 'uppercase', letterSpacing: '0.5px' },
+  terminalContainer: { backgroundColor: '#F8F9FC', border: '1px solid #E2E6EF', borderRadius: '14px', padding: '24px', fontFamily: "'JetBrains Mono', Consolas, Monaco, monospace", boxShadow: 'inset 0 2px 4px rgba(26, 29, 46, 0.05)' },
+  terminalHeader: { fontSize: '13px', fontWeight: '800', color: '#1A1D2E', textTransform: 'uppercase', marginBottom: '16px', letterSpacing: '1px' },
+  terminalContent: { height: '260px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' },
+  emptyLog: { color: '#8B92A8', fontSize: '13px', fontStyle: 'italic' },
+  logLine: { fontSize: '13px', color: '#5A6178', borderLeft: '3px solid #4338CA', paddingLeft: '12px', lineHeight: '1.5', fontFamily: "'JetBrains Mono', monospace" }
 };
 
 export default CsvDynamicTester;

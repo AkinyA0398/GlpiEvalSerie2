@@ -23,17 +23,17 @@ const BackOfficeLayout = ({ children }) => {
           <Link to="/adminTicket" style={styles.navLink}>Gestion des tickets</Link>
           <Link to="/statusConfig" style={styles.navLink}>Config statuts</Link>
           <Link to="/testCsv" style={styles.navLink}>Importation CSV</Link>
-          <Link to="/admin/reset" style={styles.navLink}>Réinitialisation</Link>
+          <Link to="/admin/reset" style={styles.navLink}>Reinitialisation</Link>
           <Link to="/list" style={styles.navLinkPublic}>Retour Vue Publique</Link>
         </nav>
 
         <button 
           onClick={handleLogout} 
           style={styles.logoutBtn}
-          onMouseOver={(e) => { e.target.style.backgroundColor = 'rgba(239, 68, 68, 0.08)'; }}
+          onMouseOver={(e) => { e.target.style.backgroundColor = 'rgba(220, 38, 38, 0.06)'; }}
           onMouseOut={(e) => { e.target.style.backgroundColor = 'transparent'; }}
         >
-          Déconnexion
+          Deconnexion
         </button>
       </aside>
 
@@ -48,16 +48,16 @@ const BackOfficeLayout = ({ children }) => {
 };
 
 const styles = {
-  container: { display: 'flex', minHeight: '100vh', backgroundColor: '#121212', color: '#f8fafc', fontFamily: 'system-ui, -apple-system, sans-serif' },
-  sidebar: { width: '260px', backgroundColor: '#1e1e1e', borderRight: '1px solid #334155', display: 'flex', flexDirection: 'column', padding: '24px', position: 'fixed', height: '100vh', boxSizing: 'border-box', zIndex: 100 },
-  logoContainer: { marginBottom: '32px', borderBottom: '1px solid #334155', paddingBottom: '16px' },
-  logoText: { margin: 0, fontSize: '20px', fontWeight: 'bold', color: '#00d2ff', letterSpacing: '0.5px' },
-  logoSub: { fontSize: '11px', color: '#64748b', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' },
-  nav: { display: 'flex', flexDirection: 'column', gap: '8px', flexGrow: 1 },
-  navLink: { color: '#cbd5e1', textDecoration: 'none', fontSize: '14px', fontWeight: '500', padding: '10px 14px', borderRadius: '6px', transition: 'all 0.2s', borderLeft: '3px solid transparent' },
-  navLinkPublic: { color: '#00d2ff', textDecoration: 'none', fontSize: '14px', fontWeight: '600', padding: '10px 14px', borderRadius: '6px', transition: 'all 0.2s', borderLeft: '3px solid #00d2ff', backgroundColor: 'rgba(0, 210, 255, 0.02)', marginTop: '12px' },
-  logoutBtn: { backgroundColor: 'transparent', border: '1px solid #ef4444', color: '#ef4444', padding: '10px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' },
-  mainContent: { flexGrow: 1, marginLeft: '260px', padding: '40px', boxSizing: 'border-box', minWidth: 0, backgroundColor: '#121212' },
+  container: { display: 'flex', minHeight: '100vh', backgroundColor: '#F8F9FC', color: '#1A1D2E', fontFamily: "'Inter', system-ui, -apple-system, sans-serif" },
+  sidebar: { width: '260px', backgroundColor: '#F1F3F9', borderRight: '1px solid #E2E6EF', display: 'flex', flexDirection: 'column', padding: '24px', position: 'fixed', height: '100vh', boxSizing: 'border-box', zIndex: 100 },
+  logoContainer: { marginBottom: '32px', borderBottom: '1px solid #E2E6EF', paddingBottom: '16px' },
+  logoText: { margin: 0, fontSize: '20px', fontWeight: '800', color: '#4338CA', letterSpacing: '-0.02em' },
+  logoSub: { fontSize: '11px', color: '#8B92A8', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' },
+  nav: { display: 'flex', flexDirection: 'column', gap: '4px', flexGrow: 1 },
+  navLink: { color: '#5A6178', textDecoration: 'none', fontSize: '14px', fontWeight: '500', padding: '10px 14px', borderRadius: '8px', transition: 'all 0.2s', borderLeft: '3px solid transparent' },
+  navLinkPublic: { color: '#4338CA', textDecoration: 'none', fontSize: '14px', fontWeight: '600', padding: '10px 14px', borderRadius: '8px', transition: 'all 0.2s', borderLeft: '3px solid #4338CA', backgroundColor: 'rgba(67, 56, 202, 0.06)', marginTop: '12px' },
+  logoutBtn: { backgroundColor: 'transparent', border: '1px solid #DC2626', color: '#DC2626', padding: '10px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', transition: 'background-color 0.2s' },
+  mainContent: { flexGrow: 1, marginLeft: '260px', padding: '40px', boxSizing: 'border-box', minWidth: 0, backgroundColor: '#F8F9FC' },
   contentWrapper: { maxWidth: '1200px', margin: '0 auto' }
 };
 

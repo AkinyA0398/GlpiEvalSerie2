@@ -153,16 +153,16 @@ const TicketsCost = () => {
                   {item.hardwareType}
                 </td>
                 {/* Formatage propre en MGA de ta valeur de réouverture */}
-                <td style={{ ...styles.tdCost, color: '#e2e8f0', textAlign: 'right' }}>
+                <td style={{ ...styles.tdCost, color: '#5A6178', textAlign: 'right' }}>
                   {item.reouverture.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
                 </td>
-                <td style={{ ...styles.tdCost, color: '#f8fafc' }}>
+                <td style={{ ...styles.tdCost, color: '#1A1D2E' }}>
                   {item.glpiCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
                 </td>
-                <td style={{ ...styles.tdCost, color: '#38bdf8' }}>
+                <td style={{ ...styles.tdCost, color: '#4338CA' }}>
                   {item.superCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
                 </td>
-                <td style={{ ...styles.tdCost, fontWeight: '700', color: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.02)' }}>
+                <td style={{ ...styles.tdCost, fontWeight: '700', color: '#059669', backgroundColor: 'rgba(5, 150, 105, 0.04)' }}>
                   {item.totalCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
                 </td>
               </tr>
@@ -171,16 +171,16 @@ const TicketsCost = () => {
             {/* LIGNE DE TOTAL GLOBAL */}
             <tr style={styles.totalRow}>
               <td style={styles.tdTotalLabel}>TOTAL PARC INFORMATIQUE</td>
-              <td style={{ ...styles.tdTotalValue, color: '#cbd5e1' }}>
+              <td style={{ ...styles.tdTotalValue, color: '#5A6178' }}>
                 {grandTotalReouverture.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
               </td>
               <td style={styles.tdTotalValue}>
                 {grandTotalGlpi.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
               </td>
-              <td style={{ ...styles.tdTotalValue, color: '#38bdf8' }}>
+              <td style={{ ...styles.tdTotalValue, color: '#4338CA' }}>
                 {grandTotalSuper.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
               </td>
-              <td style={{ ...styles.tdTotalValue, color: '#121212', backgroundColor: '#10b981', textAlign: 'right' }}>
+              <td style={{ ...styles.tdTotalValue, color: '#FFFFFF', backgroundColor: '#059669', textAlign: 'right' }}>
                 {grandTotalAll.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
               </td>
             </tr>
@@ -192,24 +192,24 @@ const TicketsCost = () => {
 };
 
 const styles = {
-  loadingContainer: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#121212' },
-  loadingText: { color: '#00d2ff', fontSize: '14px', fontFamily: 'monospace' },
-  page: { backgroundColor: '#121212', minHeight: '100vh', color: '#f8fafc', fontFamily: 'system-ui, -apple-system, sans-serif', padding: '25px' },
-  topHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', borderBottom: '1px solid #334155', paddingBottom: '16px' },
-  mainTitle: { fontSize: '22px', fontWeight: '700', color: '#00d2ff', margin: '0 0 6px 0' },
-  subtitle: { fontSize: '13px', color: '#cbd5e1', margin: 0 },
-  refreshBtn: { backgroundColor: '#1e1e1e', border: '1px solid #334155', color: '#cbd5e1', padding: '10px 18px', borderRadius: '6px', fontWeight: '600', fontSize: '13px', cursor: 'pointer' },
-  alertError: { padding: '12px 16px', borderRadius: '6px', marginBottom: '20px', fontSize: '13px', fontWeight: '600', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', color: '#ef4444' },
-  tableWrapper: { backgroundColor: '#1e1e1e', border: '1px solid #334155', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)' },
-  table: { width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' },
-  thRow: { backgroundColor: '#121212', borderBottom: '1px solid #334155' },
-  th: { padding: '16px', color: '#cbd5e1', fontWeight: '600', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' },
-  tr: { borderBottom: '1px solid #2a2a2a', '&:hover': { backgroundColor: '#252525' } },
-  tdHardware: { padding: '16px', fontWeight: '700', color: '#f8fafc', textTransform: 'capitalize' },
-  tdCost: { padding: '16px', textAlign: 'right', fontFamily: 'monospace', fontSize: '14px' },
-  totalRow: { backgroundColor: '#161616', borderTop: '3px solid #334155' },
-  tdTotalLabel: { padding: '18px 16px', fontWeight: '800', color: '#10b981', letterSpacing: '0.5px', textTransform: 'uppercase' },
-  tdTotalValue: { padding: '18px 16px', textAlign: 'right', fontFamily: 'monospace', fontSize: '15px', fontWeight: '800' }
+  loadingContainer: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#F8F9FC' },
+  loadingText: { color: '#4338CA', fontSize: '14px', fontFamily: "'JetBrains Mono', monospace", fontWeight: '600' },
+  page: { backgroundColor: '#F8F9FC', minHeight: '100vh', color: '#1A1D2E', fontFamily: "'Inter', system-ui, -apple-system, sans-serif", padding: '30px' },
+  topHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', borderBottom: '1px solid #E2E6EF', paddingBottom: '16px' },
+  mainTitle: { fontSize: '24px', fontWeight: '800', color: '#1A1D2E', margin: '0 0 6px 0', letterSpacing: '-0.02em' },
+  subtitle: { fontSize: '14px', color: '#8B92A8', margin: 0 },
+  refreshBtn: { backgroundColor: '#FFFFFF', border: '1px solid #E2E6EF', color: '#5A6178', padding: '10px 18px', borderRadius: '10px', fontWeight: '600', fontSize: '13px', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 1px 3px rgba(26, 29, 46, 0.04)' },
+  alertError: { padding: '12px 16px', borderRadius: '10px', marginBottom: '20px', fontSize: '13px', fontWeight: '600', backgroundColor: 'rgba(220, 38, 38, 0.08)', border: '1px solid rgba(220, 38, 38, 0.25)', color: '#DC2626' },
+  tableWrapper: { backgroundColor: '#FFFFFF', border: '1px solid #E2E6EF', borderRadius: '14px', overflow: 'hidden', boxShadow: '0 4px 16px rgba(26, 29, 46, 0.05)' },
+  table: { width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' },
+  thRow: { backgroundColor: '#F8F9FC', borderBottom: '2px solid #E2E6EF' },
+  th: { padding: '16px 20px', color: '#5A6178', fontWeight: '700', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' },
+  tr: { borderBottom: '1px solid #E2E6EF', transition: 'background-color 0.2s' },
+  tdHardware: { padding: '16px 20px', fontWeight: '700', color: '#1A1D2E', textTransform: 'capitalize' },
+  tdCost: { padding: '16px 20px', textAlign: 'right', fontFamily: "'JetBrains Mono', monospace", fontSize: '14px' },
+  totalRow: { backgroundColor: '#F1F3F9', borderTop: '3px solid #E2E6EF' },
+  tdTotalLabel: { padding: '20px', fontWeight: '800', color: '#059669', letterSpacing: '0.5px', textTransform: 'uppercase' },
+  tdTotalValue: { padding: '20px', textAlign: 'right', fontFamily: "'JetBrains Mono', monospace", fontSize: '16px', fontWeight: '800', color: '#1A1D2E' }
 };
 
 export default TicketsCost;

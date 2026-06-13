@@ -268,12 +268,12 @@ const CreateTicket = () => {
 };
 
 const styles = {
-  page: { backgroundColor: '#121212', minHeight: '100vh', color: '#f8fafc', fontFamily: 'system-ui, -apple-system, sans-serif', padding: '20px' },
-  header: { borderBottom: '1px solid #334155', paddingBottom: '16px', marginBottom: '24px' },
-  mainTitle: { fontSize: '22px', fontWeight: '700', color: '#00d2ff', margin: '0 0 6px 0' },
-  subtitle: { fontSize: '13px', color: '#cbd5e1', margin: 0 },
-  alertSuccess: { padding: '12px 16px', borderRadius: '6px', marginBottom: '20px', fontSize: '13px', fontWeight: '600', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', color: '#10b981' },
-  alertError: { padding: '12px 16px', borderRadius: '6px', marginBottom: '20px', fontSize: '13px', fontWeight: '600', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', color: '#ef4444' },
+  page: { backgroundColor: '#F8F9FC', minHeight: '100vh', color: '#1A1D2E', fontFamily: "'Inter', system-ui, -apple-system, sans-serif", padding: '30px' },
+  header: { borderBottom: '1px solid #E2E6EF', paddingBottom: '16px', marginBottom: '24px' },
+  mainTitle: { fontSize: '24px', fontWeight: '800', color: '#1A1D2E', margin: '0 0 6px 0', letterSpacing: '-0.02em' },
+  subtitle: { fontSize: '14px', color: '#8B92A8', margin: 0 },
+  alertSuccess: { padding: '12px 16px', borderRadius: '10px', marginBottom: '20px', fontSize: '13px', fontWeight: '600', backgroundColor: 'rgba(5, 150, 105, 0.08)', border: '1px solid rgba(5, 150, 105, 0.25)', color: '#059669' },
+  alertError: { padding: '12px 16px', borderRadius: '10px', marginBottom: '20px', fontSize: '13px', fontWeight: '600', backgroundColor: 'rgba(220, 38, 38, 0.08)', border: '1px solid rgba(220, 38, 38, 0.25)', color: '#DC2626' },
   
   // Nouveau Layout Grid Propre
   layoutGrid: { display: 'flex', width: '100%', gap: '24px', alignItems: 'flex-start' },
@@ -281,34 +281,34 @@ const styles = {
   rightColumn: { width: '45%', flexGrow: 1, position: 'sticky', top: '20px' },
   
   // Conteneurs de cartes
-  cardForm: { backgroundColor: '#1e1e1e', border: '1px solid #334155', borderRadius: '8px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' },
+  cardForm: { backgroundColor: '#FFFFFF', border: '1px solid #E2E6EF', borderRadius: '14px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: '0 2px 12px rgba(26, 29, 46, 0.05)' },
   formGroup: { display: 'flex', flexDirection: 'column', gap: '6px' },
   rowGroup: { display: 'flex', gap: '16px' },
-  label: { fontSize: '12px', fontWeight: '700', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.5px' },
+  label: { fontSize: '12px', fontWeight: '600', color: '#5A6178', textTransform: 'uppercase', letterSpacing: '0.5px' },
   
   // Inputs
-  input: { width: '100%', padding: '10px 12px', backgroundColor: '#121212', border: '1px solid #334155', borderRadius: '6px', color: '#f8fafc', fontSize: '13px', boxSizing: 'border-box' },
-  select: { width: '100%', padding: '10px 12px', backgroundColor: '#121212', border: '1px solid #334155', borderRadius: '6px', color: '#f8fafc', fontSize: '13px', boxSizing: 'border-box' },
-  textarea: { width: '100%', padding: '10px 12px', backgroundColor: '#121212', border: '1px solid #334155', borderRadius: '6px', color: '#f8fafc', fontSize: '13px', boxSizing: 'border-box', fontFamily: 'inherit', resize: 'vertical' },
+  input: { width: '100%', padding: '12px 14px', backgroundColor: '#F8F9FC', border: '1px solid #E2E6EF', borderRadius: '10px', color: '#1A1D2E', fontSize: '14px', boxSizing: 'border-box', outline: 'none', transition: 'border-color 0.2s' },
+  select: { width: '100%', padding: '12px 14px', backgroundColor: '#F8F9FC', border: '1px solid #E2E6EF', borderRadius: '10px', color: '#1A1D2E', fontSize: '14px', boxSizing: 'border-box', outline: 'none', transition: 'border-color 0.2s' },
+  textarea: { width: '100%', padding: '12px 14px', backgroundColor: '#F8F9FC', border: '1px solid #E2E6EF', borderRadius: '10px', color: '#1A1D2E', fontSize: '14px', boxSizing: 'border-box', fontFamily: 'inherit', resize: 'vertical', outline: 'none', transition: 'border-color 0.2s' },
   
   // Section Parc de droite
-  parcSection: { backgroundColor: '#1e1e1e', border: '1px solid #334155', padding: '24px', borderRadius: '8px' },
-  parcMetaTag: { fontSize: '11px', fontWeight: '700', color: '#00d2ff', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '4px' },
-  parcTitle: { display: 'block', fontSize: '16px', fontWeight: '700', color: '#f8fafc', marginBottom: '4px' },
-  parcSubtitle: { fontSize: '12px', color: '#94a3b8', margin: '0 0 16px 0' },
-  loadingText: { fontSize: '12px', color: '#64748b', margin: 0, fontFamily: 'monospace' },
+  parcSection: { backgroundColor: '#FFFFFF', border: '1px solid #E2E6EF', padding: '24px', borderRadius: '14px', boxShadow: '0 2px 12px rgba(26, 29, 46, 0.05)' },
+  parcMetaTag: { fontSize: '11px', fontWeight: '800', color: '#4338CA', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' },
+  parcTitle: { display: 'block', fontSize: '18px', fontWeight: '700', color: '#1A1D2E', marginBottom: '6px' },
+  parcSubtitle: { fontSize: '13px', color: '#8B92A8', margin: '0 0 16px 0', lineHeight: '1.4' },
+  loadingText: { fontSize: '13px', color: '#4338CA', margin: 0, fontWeight: '500' },
   
   // Badges d'infrastructure
   badgeContainer: { display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' },
-  badge: { backgroundColor: '#121212', padding: '10px 14px', borderRadius: '6px', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid #334155' },
-  badgeText: { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '85%' },
-  badgeType: { color: '#00d2ff', fontWeight: '600' },
-  badgeRemoveBtn: { border: 'none', background: 'none', color: '#ef4444', fontWeight: '700', cursor: 'pointer', fontSize: '18px', padding: '0 4px', lineHeight: 1 },
-  emptyBadgeBox: { fontSize: '12px', color: '#64748b', fontStyle: 'italic', border: '1px dashed #334155', padding: '16px', borderRadius: '6px', textAlign: 'center', backgroundColor: '#121212' },
+  badge: { backgroundColor: '#F8F9FC', padding: '12px 14px', borderRadius: '10px', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid #E2E6EF' },
+  badgeText: { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '85%', color: '#1A1D2E' },
+  badgeType: { color: '#4338CA', fontWeight: '700' },
+  badgeRemoveBtn: { border: 'none', background: 'none', color: '#DC2626', fontWeight: '700', cursor: 'pointer', fontSize: '18px', padding: '0 4px', lineHeight: 1 },
+  emptyBadgeBox: { fontSize: '13px', color: '#8B92A8', fontStyle: 'italic', border: '1px dashed #E2E6EF', padding: '16px', borderRadius: '10px', textAlign: 'center', backgroundColor: '#F8F9FC' },
   
   // Boutons d'action
-  btnActive: { width: '100%', backgroundColor: '#00d2ff', color: '#121212', border: 'none', padding: '12px 24px', borderRadius: '6px', cursor: 'pointer', fontWeight: '700', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px', transition: 'background 0.2s', marginTop: '4px' },
-  btnDisabled: { width: '100%', backgroundColor: '#1e293b', color: '#64748b', border: '1px solid #334155', padding: '12px 24px', borderRadius: '6px', cursor: 'not-allowed', fontWeight: '700', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '4px' }
+  btnActive: { width: '100%', backgroundColor: '#4338CA', color: '#FFFFFF', border: 'none', padding: '14px 24px', borderRadius: '10px', cursor: 'pointer', fontWeight: '700', fontSize: '14px', transition: 'background 0.2s', marginTop: '4px' },
+  btnDisabled: { width: '100%', backgroundColor: '#F1F3F9', color: '#8B92A8', border: '1px solid #E2E6EF', padding: '14px 24px', borderRadius: '10px', cursor: 'not-allowed', fontWeight: '700', fontSize: '14px', marginTop: '4px' }
 };
 
 export default CreateTicket;

@@ -125,32 +125,36 @@ const GlpiReset = () => {
   };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '600px', margin: '0 auto' }}>
-      <div style={{ border: '1px solid #ffcccb', backgroundColor: '#fff5f5', padding: '20px', borderRadius: '8px' }}>
+    <div style={{ padding: '24px 0', fontFamily: "'Inter', system-ui, -apple-system, sans-serif", maxWidth: '640px', margin: '0 auto' }}>
+      <div style={{ border: '1px solid rgba(220, 38, 38, 0.2)', backgroundColor: 'rgba(220, 38, 38, 0.04)', padding: '24px', borderRadius: '14px' }}>
         <button
           onClick={handleReset}
           disabled={isResetting}
           style={{
-            padding: '12px 24px',
-            backgroundColor: isResetting ? '#cca3a3' : '#d9534f',
-            color: 'white',
+            padding: '14px 24px',
+            backgroundColor: isResetting ? '#F87171' : '#DC2626',
+            color: '#FFFFFF',
             border: 'none',
-            borderRadius: '4px',
+            borderRadius: '10px',
             cursor: isResetting ? 'not-allowed' : 'pointer',
-            fontWeight: 'bold',
-            width: '100%'
+            fontWeight: '800',
+            width: '100%',
+            fontSize: '15px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            transition: 'background-color 0.2s'
           }}
         >
-          {isResetting ? "Purge complète en cours..." : "TOUT SUPPRIMER DE FORCE"}
+          {isResetting ? "Purge globale en cours..." : "Supprimer définitivement l'intégralité des données"}
         </button>
       </div>
 
       {logs.length > 0 && (
-        <div style={{ marginTop: '20px', backgroundColor: '#1e1e1e', color: '#39ff14', padding: '15px', height: '300px', overflowY: 'auto', borderRadius: '4px', fontFamily: 'monospace' }}>
-          <strong style={{ color: 'white' }}>Console de reset :</strong>
-          <div style={{ marginTop: '10px' }}>
+        <div style={{ marginTop: '24px', backgroundColor: '#1A1D2E', color: '#E2E6EF', padding: '20px', height: '320px', overflowY: 'auto', borderRadius: '14px', fontFamily: "'JetBrains Mono', Consolas, monospace", boxShadow: '0 4px 16px rgba(26, 29, 46, 0.1)' }}>
+          <strong style={{ color: '#6366F1', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '16px' }}>Terminal d'exécution système :</strong>
+          <div>
             {logs.map((log, i) => (
-              <div key={i} style={{ marginBottom: '4px', fontSize: '13px' }}>{log}</div>
+              <div key={i} style={{ marginBottom: '6px', fontSize: '13px', borderLeft: '2px solid #4338CA', paddingLeft: '12px', lineHeight: '1.5' }}>{log}</div>
             ))}
           </div>
         </div>

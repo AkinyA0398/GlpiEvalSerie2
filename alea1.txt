@@ -1,0 +1,8 @@
+(Kanban)
+boite de dialogue avec nouveau cout dans terminer
+new prix enregistrer dans sqlite3
+
+new page avec coût
+liste item = prix d'origine, new prix, somme prix
+cout total ticket pc, monitor, phone
+if item_ticket > 1, divise en 2 le prix
