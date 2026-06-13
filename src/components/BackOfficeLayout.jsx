@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const BackOfficeLayout = ({ children }) => {
@@ -23,6 +22,7 @@ const BackOfficeLayout = ({ children }) => {
           <Link to="/adminTicket" style={styles.navLink}>Gestion des tickets</Link>
           <Link to="/statusConfig" style={styles.navLink}>Config statuts</Link>
           <Link to="/testCsv" style={styles.navLink}>Importation CSV</Link>
+          <Link to="/resumeticket" style={styles.navLink}>Résumé Tickets</Link>
           <Link to="/admin/reset" style={styles.navLink}>Reinitialisation</Link>
           <Link to="/list" style={styles.navLinkPublic}>Retour Vue Publique</Link>
         </nav>

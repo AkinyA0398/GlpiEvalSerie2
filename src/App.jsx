@@ -1,8 +1,7 @@
-import React from 'react';
+
 import { createBrowserRouter, RouterProvider, Navigate, useNavigate } from 'react-router-dom';
 import TestUsers from './components/TestUsers';
 import AddUser from './components/addUser';
-import FormulaireSquelette from './squelette/Formulaire';
 import TableauSquelette from './squelette/Tableau';
 import Popup from './squelette/Popup';
 import LoginBack from './components/LoginBack';
@@ -21,6 +20,7 @@ import ResetData from './components/ResetData';
 import TicketsListKanban from './components/TicketsListKanban';
 import StatusConfigPage from './components/StatusConfigPage';
 import TicketsCost from './components/TicketsCost';
+import ResumeTicket from './components/ResumeTicket';
 
 const Login = () => {
   const navigate = useNavigate(); 
@@ -139,6 +139,16 @@ const router = createBrowserRouter([
       <ProtectedAdmin>
         <BackOfficeLayout>
           <CsvDynamicTester />
+        </BackOfficeLayout>
+      </ProtectedAdmin>
+    )
+  },
+  {
+    path: '/resumeticket', 
+    element: (
+      <ProtectedAdmin>
+        <BackOfficeLayout>
+          <ResumeTicket />
         </BackOfficeLayout>
       </ProtectedAdmin>
     )

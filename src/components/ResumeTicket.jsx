@@ -3,7 +3,7 @@ import { fetchGlpiTickets } from '../services/CrudService';
 import { apiGlpi } from '../api/apiGlpi';
 import { apiLocalStatus } from '../api/configApi';
 
-const TicketsCost = () => {
+const ResumeTicket = () => {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', type: '' });
   
@@ -52,9 +52,8 @@ const TicketsCost = () => {
       }
     });
 
-    // 3. Formatage final des lignes du tableau
     const formattedData = Object.keys(summary).map(key => ({
-      hardwareType: key,
+      category: key,
       count: summary[key].count,
       glpiCost: summary[key].glpiCost,
       superCost: summary[key].superCost,
@@ -82,8 +81,8 @@ const TicketsCost = () => {
       calculateHardwareCosts(cleanLinks, cleanCostsGlpi, cleanCostsLocal);
 
     } catch (err) {
-      console.error("Erreur lors du calcul de la synthèse financière :", err);
-      setMessage({ text: "Impossible de charger la synthèse analytique du parc.", type: 'error' });
+      console.error("Erreur lors du calcul du résumé :", err);
+      setMessage({ text: "Impossible de charger le résumé des tickets.", type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -97,6 +96,7 @@ const TicketsCost = () => {
     return () => { isMounted = false; };
   }, [loadAllCostData]);
 
+
   const grandTotalReouverture = hardwareSummary.reduce((sum, item) => sum + item.reouverture, 0);
   const grandTotalGlpi = hardwareSummary.reduce((sum, item) => sum + item.glpiCost, 0);
   const grandTotalSuper = hardwareSummary.reduce((sum, item) => sum + item.superCost, 0);
@@ -105,7 +105,7 @@ const TicketsCost = () => {
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
-        <div style={styles.loadingText}>Calcul analytique et distribution des coûts d'infrastructure...</div>
+        <div style={styles.loadingText}>Chargement du résumé financier...</div>
       </div>
     );
   }
@@ -115,10 +115,10 @@ const TicketsCost = () => {
       
       <div style={styles.topHeader}>
         <div>
-          <h2 style={styles.mainTitle}>Comptabilité Analytique par Parc Matériel</h2>
-          <p style={styles.subtitle}>Répartition des charges financières : GLPI vs Base Locale SQLite</p>
+          <h2 style={styles.mainTitle}>Résumé Financier des Tickets</h2>
+          <p style={styles.subtitle}>Tableau de bord : Catégorie, Coût GLPI, Coût Saisi, Coût Réouverture</p>
         </div>
-        <button onClick={loadAllCostData} style={styles.refreshBtn}>Actualiser les coûts</button>
+        <button onClick={loadAllCostData} style={styles.refreshBtn}>Actualiser</button>
       </div>
 
       {message.text && (
@@ -131,28 +131,27 @@ const TicketsCost = () => {
         <table style={styles.table}>
           <thead>
             <tr style={styles.thRow}>
-              <th style={styles.th}>Type d'infrastructure</th>
-              <th style={{ ...styles.th, textAlign: 'right', color: '#64748b' }}>Réouverture (Local)</th>
-              <th style={{ ...styles.th, textAlign: 'right' }}>Coût GLPI (Native)</th>
-              <th style={{ ...styles.th, textAlign: 'right' }}>Super Coût (Clôture)</th>
-              <th style={{ ...styles.th, textAlign: 'right', color: '#00d2ff' }}>Coût Total Brut</th>
+              <th style={styles.th}>Catégorie</th>
+              <th style={{ ...styles.th, textAlign: 'right' }}>Coût GLPI</th>
+              <th style={{ ...styles.th, textAlign: 'right' }}>Coût Saisi</th>
+              <th style={{ ...styles.th, textAlign: 'right', color: '#64748b' }}>Coût Réouverture</th>
+              <th style={{ ...styles.th, textAlign: 'right', color: '#00d2ff' }}>Somme (Tous Coûts)</th>
             </tr>
           </thead>
           <tbody>
             {hardwareSummary.map((item, idx) => (
               <tr key={idx} style={styles.tr}>
                 <td style={styles.tdHardware}>
-                  {item.hardwareType}
-                </td>
-                {/* Formatage propre en MGA de ta valeur de réouverture */}
-                <td style={{ ...styles.tdCost, color: '#5A6178', textAlign: 'right' }}>
-                  {item.reouverture.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
+                  {item.category}
                 </td>
                 <td style={{ ...styles.tdCost, color: '#1A1D2E' }}>
                   {item.glpiCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
                 </td>
                 <td style={{ ...styles.tdCost, color: '#4338CA' }}>
                   {item.superCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
+                </td>
+                <td style={{ ...styles.tdCost, color: '#5A6178', textAlign: 'right' }}>
+                  {item.reouverture.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
                 </td>
                 <td style={{ ...styles.tdCost, fontWeight: '700', color: '#059669', backgroundColor: 'rgba(5, 150, 105, 0.04)' }}>
                   {item.totalCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
@@ -162,15 +161,15 @@ const TicketsCost = () => {
 
             {/* LIGNE DE TOTAL GLOBAL */}
             <tr style={styles.totalRow}>
-              <td style={styles.tdTotalLabel}>TOTAL PARC INFORMATIQUE</td>
-              <td style={{ ...styles.tdTotalValue, color: '#5A6178' }}>
-                {grandTotalReouverture.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
-              </td>
+              <td style={styles.tdTotalLabel}>TOTAL GLOBAL</td>
               <td style={styles.tdTotalValue}>
                 {grandTotalGlpi.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
               </td>
               <td style={{ ...styles.tdTotalValue, color: '#4338CA' }}>
                 {grandTotalSuper.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
+              </td>
+              <td style={{ ...styles.tdTotalValue, color: '#5A6178' }}>
+                {grandTotalReouverture.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
               </td>
               <td style={{ ...styles.tdTotalValue, color: '#FFFFFF', backgroundColor: '#059669', textAlign: 'right' }}>
                 {grandTotalAll.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
@@ -204,4 +203,4 @@ const styles = {
   tdTotalValue: { padding: '20px', textAlign: 'right', fontFamily: "'JetBrains Mono', monospace", fontSize: '16px', fontWeight: '800', color: '#1A1D2E' }
 };
 
-export default TicketsCost;
+export default ResumeTicket;

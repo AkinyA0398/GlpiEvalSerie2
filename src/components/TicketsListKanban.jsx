@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { fetchGlpiTickets, deleteGlpiTicket } from '../services/CrudService'; 
+import { useState, useEffect, useCallback } from 'react';
+import { fetchGlpiTickets } from '../services/CrudService'; 
 import { apiGlpi } from '../api/apiGlpi';
 import { apiLocalStatus } from '../api/configApi'; 
 
@@ -11,11 +11,8 @@ const TicketsListKanban = () => {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [loading, setLoading] = useState(true);
   const [VAleur,setVAleur]=useState(0);
-  const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
-  const [ticketDetail,setTicketDetails]= useState([]);
   const [allLinks, setAllLinks] = useState([]);
-  const [allCosts, setAllCosts] = useState([]);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -42,8 +39,6 @@ const TicketsListKanban = () => {
     status: 1       
   });
 
-  const priorityLabels = { 1: 'Très basse', 2: 'Basse', 3: 'Moyenne', 4: 'Haute', 5: 'Très haute' };
-  const typeLabels = { 1: 'Incident', 2: 'Demande' };
 
   const CURRENT_LANG = localStorage.getItem('kanban_lang') || 'fr'; 
 
@@ -52,10 +47,14 @@ const TicketsListKanban = () => {
   const STATUS_CLOSED = 6;      
 
   useEffect(() => {
-    loadAllTicketsData();
-  }, []);
+    let isMounted = true;
+    if (isMounted) {
+      loadAllTicketsData();
+    }
+    return () => { isMounted = false; };
+  }, [loadAllTicketsData]);
 
-  const loadAllTicketsData = async () => {
+  const loadAllTicketsData = useCallback(async () => {
     setLoading(true);
     try {
       const localStatuses = await apiLocalStatus(`status?lang=${CURRENT_LANG}`);
@@ -84,7 +83,6 @@ const TicketsListKanban = () => {
       
       setTickets(kanbanTickets);
       setAllLinks(Array.isArray(linksRes) ? linksRes : []);
-      setAllCosts(Array.isArray(costsRes) ? costsRes : []);
 
       const cleanUsers = Array.isArray(usersRes) ? usersRes : [];
       setTechnicians(cleanUsers.map(u => ({ id: u.id, name: u.name || u.realname || u.name })));
@@ -95,7 +93,7 @@ const TicketsListKanban = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [CURRENT_LANG]);
 
   const handleDragStart = (e, ticketId) => {
     e.dataTransfer.setData('text/plain', ticketId);
@@ -319,7 +317,6 @@ const reouverturAnnuler = async (e) => {
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
     if (!newTicket.name.trim()) return;
-    setActionLoading(true);
     try {
       const payload = {
         name: newTicket.name.trim(),
@@ -334,8 +331,6 @@ const reouverturAnnuler = async (e) => {
       await loadAllTicketsData();
     } catch (err) {
       setMessage({ text: `Erreur d'injection : ${err.message}`, type: 'error' });
-    } finally {
-      setActionLoading(false);
     }
   };
 
