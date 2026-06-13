@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { fetchGlpiItems, linkItemToTicket } from '../services/CrudService';
 import { apiGlpi } from '../api/apiGlpi';
 
@@ -15,7 +15,9 @@ const CreateTicket = () => {
   const [loadingParc, setLoadingParc] = useState(true);
   const [message, setMessage] = useState({ text: '', type: '' });
 
-
+  useEffect(() => {
+    loadParcItems();
+  }, []);
 
   const loadParcItems = async () => {
     try {
@@ -43,13 +45,6 @@ const CreateTicket = () => {
       setLoadingParc(false);
     }
   };
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      loadParcItems();
-    }, 0);
-    return () => clearTimeout(timer);
-  }, []);
 
   const handleAddItem = (e) => {
     const value = e.target.value;
@@ -273,12 +268,12 @@ const CreateTicket = () => {
 };
 
 const styles = {
-  page: { backgroundColor: '#f1f5f9', minHeight: '100vh', color: '#0f172a', fontFamily: 'system-ui, -apple-system, sans-serif', padding: '20px' },
-  header: { borderBottom: '1px solid #e2e8f0', paddingBottom: '16px', marginBottom: '24px' },
-  mainTitle: { fontSize: '22px', fontWeight: '700', color: '#0072ff', margin: '0 0 6px 0' },
-  subtitle: { fontSize: '13px', color: '#64748b', margin: 0 },
-  alertSuccess: { padding: '12px 16px', borderRadius: '6px', marginBottom: '20px', fontSize: '13px', fontWeight: '600', backgroundColor: '#ecfdf5', border: '1px solid #10b981', color: '#059669' },
-  alertError: { padding: '12px 16px', borderRadius: '6px', marginBottom: '20px', fontSize: '13px', fontWeight: '600', backgroundColor: '#fee2e2', border: '1px solid #ef4444', color: '#dc2626' },
+  page: { backgroundColor: '#121212', minHeight: '100vh', color: '#f8fafc', fontFamily: 'system-ui, -apple-system, sans-serif', padding: '20px' },
+  header: { borderBottom: '1px solid #334155', paddingBottom: '16px', marginBottom: '24px' },
+  mainTitle: { fontSize: '22px', fontWeight: '700', color: '#00d2ff', margin: '0 0 6px 0' },
+  subtitle: { fontSize: '13px', color: '#cbd5e1', margin: 0 },
+  alertSuccess: { padding: '12px 16px', borderRadius: '6px', marginBottom: '20px', fontSize: '13px', fontWeight: '600', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', color: '#10b981' },
+  alertError: { padding: '12px 16px', borderRadius: '6px', marginBottom: '20px', fontSize: '13px', fontWeight: '600', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', color: '#ef4444' },
   
   // Nouveau Layout Grid Propre
   layoutGrid: { display: 'flex', width: '100%', gap: '24px', alignItems: 'flex-start' },
@@ -286,34 +281,34 @@ const styles = {
   rightColumn: { width: '45%', flexGrow: 1, position: 'sticky', top: '20px' },
   
   // Conteneurs de cartes
-  cardForm: { backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' },
+  cardForm: { backgroundColor: '#1e1e1e', border: '1px solid #334155', borderRadius: '8px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' },
   formGroup: { display: 'flex', flexDirection: 'column', gap: '6px' },
   rowGroup: { display: 'flex', gap: '16px' },
-  label: { fontSize: '12px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px' },
+  label: { fontSize: '12px', fontWeight: '700', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.5px' },
   
   // Inputs
-  input: { width: '100%', padding: '10px 12px', backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', color: '#0f172a', fontSize: '13px', boxSizing: 'border-box' },
-  select: { width: '100%', padding: '10px 12px', backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', color: '#0f172a', fontSize: '13px', boxSizing: 'border-box' },
-  textarea: { width: '100%', padding: '10px 12px', backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', color: '#0f172a', fontSize: '13px', boxSizing: 'border-box', fontFamily: 'inherit', resize: 'vertical' },
+  input: { width: '100%', padding: '10px 12px', backgroundColor: '#121212', border: '1px solid #334155', borderRadius: '6px', color: '#f8fafc', fontSize: '13px', boxSizing: 'border-box' },
+  select: { width: '100%', padding: '10px 12px', backgroundColor: '#121212', border: '1px solid #334155', borderRadius: '6px', color: '#f8fafc', fontSize: '13px', boxSizing: 'border-box' },
+  textarea: { width: '100%', padding: '10px 12px', backgroundColor: '#121212', border: '1px solid #334155', borderRadius: '6px', color: '#f8fafc', fontSize: '13px', boxSizing: 'border-box', fontFamily: 'inherit', resize: 'vertical' },
   
   // Section Parc de droite
-  parcSection: { backgroundColor: '#ffffff', border: '1px solid #e2e8f0', padding: '24px', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' },
-  parcMetaTag: { fontSize: '11px', fontWeight: '700', color: '#0072ff', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '4px' },
-  parcTitle: { display: 'block', fontSize: '16px', fontWeight: '700', color: '#0f172a', marginBottom: '4px' },
-  parcSubtitle: { fontSize: '12px', color: '#64748b', margin: '0 0 16px 0' },
+  parcSection: { backgroundColor: '#1e1e1e', border: '1px solid #334155', padding: '24px', borderRadius: '8px' },
+  parcMetaTag: { fontSize: '11px', fontWeight: '700', color: '#00d2ff', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '4px' },
+  parcTitle: { display: 'block', fontSize: '16px', fontWeight: '700', color: '#f8fafc', marginBottom: '4px' },
+  parcSubtitle: { fontSize: '12px', color: '#94a3b8', margin: '0 0 16px 0' },
   loadingText: { fontSize: '12px', color: '#64748b', margin: 0, fontFamily: 'monospace' },
   
   // Badges d'infrastructure
   badgeContainer: { display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' },
-  badge: { backgroundColor: '#f8fafc', padding: '10px 14px', borderRadius: '6px', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid #e2e8f0' },
-  badgeText: { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '85%', color: '#0f172a' },
-  badgeType: { color: '#0072ff', fontWeight: '600' },
+  badge: { backgroundColor: '#121212', padding: '10px 14px', borderRadius: '6px', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid #334155' },
+  badgeText: { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '85%' },
+  badgeType: { color: '#00d2ff', fontWeight: '600' },
   badgeRemoveBtn: { border: 'none', background: 'none', color: '#ef4444', fontWeight: '700', cursor: 'pointer', fontSize: '18px', padding: '0 4px', lineHeight: 1 },
-  emptyBadgeBox: { fontSize: '12px', color: '#64748b', fontStyle: 'italic', border: '1px dashed #cbd5e1', padding: '16px', borderRadius: '6px', textAlign: 'center', backgroundColor: '#f8fafc' },
+  emptyBadgeBox: { fontSize: '12px', color: '#64748b', fontStyle: 'italic', border: '1px dashed #334155', padding: '16px', borderRadius: '6px', textAlign: 'center', backgroundColor: '#121212' },
   
   // Boutons d'action
-  btnActive: { width: '100%', backgroundImage: 'linear-gradient(135deg, #0072ff 0%, #00c6ff 100%)', color: '#ffffff', border: 'none', padding: '12px 24px', borderRadius: '6px', cursor: 'pointer', fontWeight: '700', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px', transition: 'box-shadow 0.2s', marginTop: '4px', boxShadow: '0 4px 6px -1px rgba(0, 114, 255, 0.2)' },
-  btnDisabled: { width: '100%', backgroundColor: '#e2e8f0', color: '#94a3b8', border: '1px solid #cbd5e1', padding: '12px 24px', borderRadius: '6px', cursor: 'not-allowed', fontWeight: '700', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '4px' }
+  btnActive: { width: '100%', backgroundColor: '#00d2ff', color: '#121212', border: 'none', padding: '12px 24px', borderRadius: '6px', cursor: 'pointer', fontWeight: '700', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px', transition: 'background 0.2s', marginTop: '4px' },
+  btnDisabled: { width: '100%', backgroundColor: '#1e293b', color: '#64748b', border: '1px solid #334155', padding: '12px 24px', borderRadius: '6px', cursor: 'not-allowed', fontWeight: '700', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '4px' }
 };
 
 export default CreateTicket;

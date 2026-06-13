@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { fetchGlpiTickets, deleteGlpiTicket } from '../services/CrudService';
 import { apiGlpi } from '../api/apiGlpi';
-
+import { apiLocalStatus } from '../api/configApi';
 const TicketsList = () => {
   const [tickets, setTickets] = useState([]);
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -11,23 +11,25 @@ const TicketsList = () => {
 
   const [allLinks, setAllLinks] = useState([]);
   const [allCosts, setAllCosts] = useState([]);
-  
+  const [kanbanStatuses, setKanbanStatuses] = useState([]); 
   // ÉTAT POUR LE POP-UP GLOBAL
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const CURRENT_LANG = localStorage.getItem('kanban_lang') || 'fr';
   const priorityLabels = { 1: 'Très basse', 2: 'Basse', 3: 'Moyenne', 4: 'Haute', 5: 'Très haute' };
   const typeLabels = { 1: 'Incident', 2: 'Demande' };
   
-  const statusConfig = {
-    1: { label: 'Nouveau', color: '#0072ff', bg: '#eff6ff', border: '#bfdbfe' },
-    2: { label: 'En cours (Attribué)', color: '#0284c7', bg: '#f0f9ff', border: '#bae6fd' },
-    3: { label: 'Planifié', color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe' },
-    4: { label: 'En attente', color: '#d97706', bg: '#fffbeb', border: '#fde68a' },
-    5: { label: 'Résolu', color: '#059669', bg: '#ecfdf5', border: '#a7f3d0' },
-    6: { label: 'Clos', color: '#475569', bg: '#f8fafc', border: '#e2e8f0' },
+  var statusConfig = {
+    1: { label: 'Nouveau', color: '#00d2ff', bg: 'rgba(0, 210, 255, 0.1)', border: '#00d2ff' },
+    2: { label: 'En cours (Attribué)', color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.1)', border: '#38bdf8' },
+    3: { label: 'Planifié', color: '#a855f7', bg: 'rgba(168, 85, 247, 0.1)', border: '#a855f7' },
+    4: { label: 'En attente', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)', border: '#f59e0b' },
+    5: { label: 'Résolu', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)', border: '#10b981' },
+    6: { label: 'Clos', color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.1)', border: '#94a3b8' },
   };
 
-
+  useEffect(() => {
+    loadAllTicketsData();
+  }, []);
 
   const loadAllTicketsData = async () => {
     setLoading(true);
@@ -44,6 +46,24 @@ const TicketsList = () => {
       setTickets(cleanTickets);
       setAllLinks(Array.isArray(linksRes) ? linksRes : []);
       setAllCosts(Array.isArray(costsRes) ? costsRes : []);
+      const localStatuses = await apiLocalStatus(`status?lang=${CURRENT_LANG}`);
+
+              const formattedStatuses = {};
+              localStatuses.forEach(status => {
+                formattedStatuses[status.id] = {
+                  id: status.id, 
+                  label: status.name,
+                  color: status.couleur,
+                  border: status.couleur,
+                  bg: status.couleur.startsWith('#') ? `${status.couleur}0D` : 'rgba(0, 210, 255, 0.05)' 
+                };
+              });
+
+            setKanbanStatuses(formattedStatuses);
+
+            console.log("kanbastatues",kanbanStatuses);
+            
+            
 
     } catch (err) {
       console.error("Erreur lors de l'initialisation des données GLPI:", err);
@@ -52,14 +72,9 @@ const TicketsList = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      loadAllTicketsData();
-    }, 0);
-    return () => clearTimeout(timer);
-  }, []);
-
+useEffect(() => {
+  console.log("KanbanStatuses a changé et vaut maintenant :", kanbanStatuses);
+}, [kanbanStatuses]);
   const handleDelete = async (ticketId) => {
     if (!window.confirm(`Confirmez-vous la suppression définitive du ticket #${ticketId} ?`)) return;
     
@@ -92,9 +107,16 @@ const TicketsList = () => {
     const material = parseFloat(item.cost_material) || 0;
     const time = parseFloat(item.cost_time) || 0;
     const minutes = parseInt(item.actiontime, 10) || 0;
-    return sum + fixed + material + (time * (minutes / 60));
+    console.log(minutes);
+    let ok=0;
+    if(time==0){
+      ok=0;
+    }else{
+      ok=(minutes/60)/time;
+    }
+    return sum + fixed + material + ok;
   }, 0);
-
+console.log("ticket",ticketCosts);
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
@@ -138,36 +160,48 @@ const TicketsList = () => {
               </thead>
               <tbody>
                 {tickets.map(ticket => {
-                  const status = statusConfig[ticket.status] || { label: `Code ${ticket.status}`, color: '#94a3b8', bg: '#1e293b', border: '#334155' };
-                  const isSelected = selectedTicket?.id === ticket.id;
+  // Recherche d'abord dans l'API, sinon dans la config locale, sinon un fallback neutre
+  const status = kanbanStatuses[ticket.status] || statusConfig[ticket.status] || {
+    label: `Statut ${ticket.status}`,
+    color: '#94a3b8',
+    bg: 'rgba(148, 163, 184, 0.1)',
+    border: '#334155'
+  };
 
-                  return (
-                    <tr 
-                      key={ticket.id} 
-                      onClick={() => {
-                        setSelectedTicket(ticket);
-                        setIsModalOpen(false);
-                      }}
-                      style={{ 
-                        ...styles.tr,
-                        backgroundColor: isSelected ? '#eff6ff' : 'transparent',
-                        borderColor: isSelected ? '#0072ff' : '#e2e8f0'
-                      }}
-                    >
-                      <td style={styles.tdId}>#{ticket.id}</td>
-                      <td style={styles.tdContent}>
-                        <div style={styles.ticketName} title={ticket.name}>{ticket.name}</div>
-                        <span style={styles.ticketTypeLabel}>{typeLabels[ticket.type] || 'Ticket'}</span>
-                      </td>
-                      <td style={styles.td}>
-                        <span style={{ backgroundColor: status.bg, color: status.color, border: `1px solid ${status.border}`, ...styles.statusBadge }}>
-                          {status.label}
-                        </span>
-                      </td>
-                      <td style={styles.tdUrgency}>{priorityLabels[ticket.urgency] || 'Moyenne'}</td>
-                    </tr>
-                  );
-                })}
+  const isSelected = selectedTicket?.id === ticket.id;
+
+  return (
+    <tr 
+      key={ticket.id} 
+      onClick={() => {
+        setSelectedTicket(ticket);
+        setIsModalOpen(false);
+      }}
+      style={{ 
+        ...styles.tr,
+        backgroundColor: isSelected ? 'rgba(0, 210, 255, 0.04)' : 'transparent',
+        borderColor: isSelected ? '#00d2ff' : '#1e1e1e'
+      }}
+    >
+      <td style={styles.tdId}>#{ticket.id}</td>
+      <td style={styles.tdContent}>
+        <div style={styles.ticketName} title={ticket.name}>{ticket.name}</div>
+        <span style={styles.ticketTypeLabel}>{typeLabels[ticket.type] || 'Ticket'}</span>
+      </td>
+      <td style={styles.td}>
+        <span style={{ 
+          backgroundColor: status.bg, 
+          color: status.color, 
+          border: `1px solid ${status.border}`, 
+          ...styles.statusBadge 
+        }}>
+          {status.label}
+        </span>
+      </td>
+      <td style={styles.tdUrgency}>{priorityLabels[ticket.urgency] || 'Moyenne'}</td>
+    </tr>
+  );
+})}
               </tbody>
             </table>
           </div>
@@ -216,12 +250,12 @@ const TicketsList = () => {
                 <div style={styles.cardDate}>Indexation initiale : {selectedTicket.date || 'Donnée non synchronisée'}</div>
               </div>
               <span style={{ 
-                backgroundColor: (statusConfig[selectedTicket.status] || {}).bg || '#1e293b', 
+                backgroundColor: (kanbanStatuses[selectedTicket.status] || {}).bg || '#1e293b', 
                 color: (statusConfig[selectedTicket.status] || {}).color || '#94a3b8', 
                 border: `1px solid ${(statusConfig[selectedTicket.status] || {}).border || '#334155'}`,
                 ...styles.statusBadge
               }}>
-                {(statusConfig[selectedTicket.status] || {}).label || selectedTicket.status}
+                {(kanbanStatuses[selectedTicket.status] || {}).label || selectedTicket.status}
               </span>
             </div>
 
@@ -361,68 +395,73 @@ const TicketsList = () => {
 };
 
 const styles = {
-  loadingContainer: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f1f5f9' },
-  loadingText: { color: '#0072ff', fontSize: '14px', fontFamily: 'monospace' },
-  page: { backgroundColor: '#f1f5f9', minHeight: '100vh', color: '#0f172a', fontFamily: 'system-ui, -apple-system, sans-serif', padding: '20px' },
-  topHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid #e2e8f0', paddingBottom: '16px' },
-  mainTitle: { fontSize: '22px', fontWeight: '700', color: '#0072ff', margin: '0 0 6px 0' },
-  subtitle: { fontSize: '13px', color: '#64748b', margin: 0 },
-  refreshBtn: { backgroundImage: 'linear-gradient(135deg, #0072ff 0%, #00c6ff 100%)', border: 'none', color: '#ffffff', padding: '8px 16px', borderRadius: '6px', fontWeight: '600', fontSize: '13px', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0, 114, 255, 0.2)' },
-  alertSuccess: { padding: '12px 16px', borderRadius: '6px', marginBottom: '20px', fontSize: '13px', fontWeight: '600', backgroundColor: '#ecfdf5', border: '1px solid #10b981', color: '#059669' },
-  alertError: { padding: '12px 16px', borderRadius: '6px', marginBottom: '20px', fontSize: '13px', fontWeight: '600', backgroundColor: '#fee2e2', border: '1px solid #ef4444', color: '#dc2626' },
+  loadingContainer: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#121212' },
+  loadingText: { color: '#00d2ff', fontSize: '14px', fontFamily: 'monospace' },
+  page: { backgroundColor: '#121212', minHeight: '100vh', color: '#f8fafc', fontFamily: 'system-ui, -apple-system, sans-serif', padding: '20px' },
+  topHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid #334155', paddingBottom: '16px' },
+  mainTitle: { fontSize: '22px', fontWeight: '700', color: '#00d2ff', margin: '0 0 6px 0' },
+  subtitle: { fontSize: '13px', color: '#cbd5e1', margin: 0 },
+  refreshBtn: { backgroundColor: '#1e1e1e', border: '1px solid #334155', color: '#cbd5e1', padding: '8px 16px', borderRadius: '6px', fontWeight: '600', fontSize: '13px', cursor: 'pointer' },
+  alertSuccess: { padding: '12px 16px', borderRadius: '6px', marginBottom: '20px', fontSize: '13px', fontWeight: '600', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', color: '#10b981' },
+  alertError: { padding: '12px 16px', borderRadius: '6px', marginBottom: '20px', fontSize: '13px', fontWeight: '600', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', color: '#ef4444' },
   layoutGrid: { display: 'flex', width: '100%', gap: '24px', alignItems: 'flex-start' },
-  leftColumn: { width: '55%', flexShrink: 0 },
+  leftColumn: { width: '80%', flexShrink: 0 },
   rightColumn: { width: '45%', flexGrow: 1, position: 'sticky', top: '20px' },
-  tableWrapper: { backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' },
+  tableWrapper: { backgroundColor: '#1e1e1e', border: '1px solid #334155', borderRadius: '8px', overflow: 'hidden' },
   table: { width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' },
-  thRow: { backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' },
-  th: { padding: '14px 16px', color: '#475569', fontWeight: '600', fontSize: '12px', textTransform: 'uppercase' },
-  tr: { borderBottom: '1px solid #e2e8f0', cursor: 'pointer' },
+  thRow: { backgroundColor: '#121212', borderBottom: '1px solid #334155' },
+  th: { padding: '14px 16px', color: '#cbd5e1', fontWeight: '600', fontSize: '12px', textTransform: 'uppercase' },
+  tr: { borderBottom: '1px solid #2a2a2a', cursor: 'pointer' },
   tdId: { padding: '14px 16px', fontWeight: '700', color: '#64748b', fontFamily: 'monospace' },
   tdContent: { padding: '14px 16px', maxWidth: '240px' },
-  ticketName: { fontWeight: '600', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
+  ticketName: { fontWeight: '600', color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
   ticketTypeLabel: { color: '#64748b', fontSize: '11px', display: 'block', marginTop: '2px' },
   td: { padding: '14px 16px' },
-  tdUrgency: { padding: '14px 16px', color: '#475569' },
+  tdUrgency: { padding: '14px 16px', color: '#cbd5e1' },
   statusBadge: { padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '700', display: 'inline-block' },
-  emptyStateBox: { border: '2px dashed #e2e8f0', borderRadius: '8px', padding: '40px', textAlign: 'center', color: '#64748b', fontStyle: 'italic', backgroundColor: '#ffffff', fontSize: '13px' },
+  emptyStateBox: { border: '2px dashed #334155', borderRadius: '8px', padding: '40px', textAlign: 'center', color: '#64748b', fontStyle: 'italic', backgroundColor: '#1e1e1e', fontSize: '13px' },
 
-  previewCard: { backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '20px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' },
-  previewTitle: { margin: '8px 0', color: '#0f172a', fontSize: '16px', fontWeight: '700' },
-  previewMeta: { backgroundColor: '#f1f5f9', padding: '12px', borderRadius: '6px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', marginBottom: '16px', color: '#475569' },
-  btnOpenModalGlobal: { width: '100%', backgroundImage: 'linear-gradient(135deg, #0072ff 0%, #00c6ff 100%)', border: 'none', color: '#ffffff', padding: '10px 16px', borderRadius: '6px', fontWeight: '700', fontSize: '13px', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.5px', boxShadow: '0 4px 6px -1px rgba(0, 114, 255, 0.2)' },
+  // PANNEAU DROIT CONFIGURATION ÉPURÉE
+  previewCard: { backgroundColor: '#1e1e1e', border: '1px solid #334155', borderRadius: '8px', padding: '20px' },
+  previewTitle: { margin: '8px 0', color: '#f8fafc', fontSize: '16px', fontWeight: '700' },
+  previewMeta: { backgroundColor: '#121212', padding: '12px', borderRadius: '6px', border: '1px solid #334155', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', marginBottom: '16px' },
+  btnOpenModalGlobal: { width: '100%', backgroundColor: '#00d2ff', border: 'none', color: '#121212', padding: '10px 16px', borderRadius: '6px', fontWeight: '700', fontSize: '13px', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.5px' },
 
-  modalOverlay: { position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(15, 23, 42, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' },
-  modalContent: { backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', width: '95%', maxWidth: '1100px', display: 'flex', flexDirection: 'column', maxHeight: '90vh', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' },
-  modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '20px 24px', borderBottom: '1px solid #e2e8f0' },
-  modalTitle: { margin: '4px 0', color: '#0072ff', fontSize: '18px', fontWeight: '700' },
+  // PARAMÈTRES DU POP-UP STRUCTUREL COMPLET
+  modalOverlay: { position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' },
+  modalContent: { backgroundColor: '#1e1e1e', border: '1px solid #334155', borderRadius: '8px', width: '95%', maxWidth: '1100px', display: 'flex', flexDirection: 'column', maxHeight: '90vh', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.7)' },
+  modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '20px 24px', borderBottom: '1px solid #334155' },
+  modalTitle: { margin: '4px 0', color: '#00d2ff', fontSize: '18px', fontWeight: '700' },
   cardDate: { fontSize: '12px', color: '#64748b', marginTop: '2px' },
-  cardMetaTag: { fontSize: '11px', fontWeight: '700', color: '#0072ff', textTransform: 'uppercase', letterSpacing: '0.5px' },
+  cardMetaTag: { fontSize: '11px', fontWeight: '700', color: '#00d2ff', textTransform: 'uppercase', letterSpacing: '0.5px' },
   modalBody: { padding: '24px', overflowY: 'auto', flexGrow: 1 },
   
-  metaDataGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '14px', marginBottom: '20px', backgroundColor: '#f8fafc', padding: '16px', borderRadius: '6px', border: '1px solid #e2e8f0' },
+  // GRILLE INTERNE DU POP-UP
+  metaDataGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '14px', marginBottom: '20px', backgroundColor: '#121212', padding: '16px', borderRadius: '6px', border: '1px solid #334155' },
   metaItem: { display: 'flex', flexDirection: 'column', gap: '4px' },
   metaLabel: { fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' },
-  metaValue: { fontSize: '13px', color: '#0f172a', fontWeight: '500' },
+  metaValue: { fontSize: '13px', color: '#cbd5e1', fontWeight: '500' },
   sectionBlock: { marginBottom: '16px' },
-  sectionTitle: { fontSize: '12px', color: '#475569', fontWeight: '700', display: 'block', marginBottom: '8px', textTransform: 'uppercase' },
-  descriptionBox: { backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', padding: '12px', borderRadius: '6px', fontSize: '13px', color: '#475569', whiteSpace: 'pre-line', maxHeight: '120px', overflowY: 'auto' },
+  sectionTitle: { fontSize: '12px', color: '#cbd5e1', fontWeight: '700', display: 'block', marginBottom: '8px', textTransform: 'uppercase' },
+  descriptionBox: { backgroundColor: '#121212', border: '1px solid #334155', padding: '12px', borderRadius: '6px', fontSize: '13px', color: '#cbd5e1', whiteSpace: 'pre-line', maxHeight: '120px', overflowY: 'auto' },
   badgeContainer: { display: 'flex', flexWrap: 'wrap', gap: '6px' },
-  hardwareBadge: { backgroundColor: '#eff6ff', color: '#0072ff', padding: '4px 10px', borderRadius: '4px', fontSize: '12px', border: '1px solid #bfdbfe', fontWeight: '600' },
+  hardwareBadge: { backgroundColor: 'rgba(0, 210, 255, 0.05)', color: '#00d2ff', padding: '4px 10px', borderRadius: '4px', fontSize: '12px', border: '1px solid rgba(0, 210, 255, 0.2)', fontWeight: '600' },
   emptyInlineText: { fontSize: '12px', color: '#64748b', fontStyle: 'italic', marginTop: '4px', display: 'block' },
 
-  costTableWrapper: { backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', overflowX: 'auto', marginTop: '6px' },
+  // CONFIGURATION DU GRANDE TABLEAU DE COÛTS
+  costTableWrapper: { backgroundColor: '#121212', border: '1px solid #334155', borderRadius: '6px', overflowX: 'auto', marginTop: '6px' },
   costTable: { width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '11px' },
-  costThRow: { backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' },
-  costTh: { padding: '10px 12px', color: '#475569', fontWeight: '600', textTransform: 'uppercase', whiteSpace: 'nowrap' },
-  costTr: { borderBottom: '1px solid #e2e8f0' },
-  costTd: { padding: '10px 12px', color: '#475569', whiteSpace: 'nowrap', fontFamily: 'monospace' },
-  costTotalRow: { backgroundColor: '#ecfdf5', borderTop: '2px solid #e2e8f0' },
+  costThRow: { backgroundColor: '#1e1e1e', borderBottom: '1px solid #334155' },
+  costTh: { padding: '10px 12px', color: '#cbd5e1', fontWeight: '600', textTransform: 'uppercase', whiteSpace: 'nowrap' },
+  costTr: { borderBottom: '1px solid #1e1e1e' },
+  costTd: { padding: '10px 12px', color: '#94a3b8', whiteSpace: 'nowrap', fontFamily: 'monospace' },
+  costTotalRow: { backgroundColor: 'rgba(16, 185, 129, 0.03)', borderTop: '2px solid #334155' },
 
-  modalFooter: { padding: '16px 24px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', gap: '12px', backgroundColor: '#f8fafc', borderBottomLeftRadius: '8px', borderBottomRightRadius: '8px' },
-  btnDeleteActive: { backgroundImage: 'linear-gradient(135deg, #f87171 0%, #ef4444 100%)', border: 'none', color: '#ffffff', padding: '8px 16px', borderRadius: '6px', fontWeight: '700', cursor: 'pointer', fontSize: '13px', boxShadow: '0 2px 4px rgba(239, 68, 68, 0.2)' },
-  btnDeleteDisabled: { backgroundColor: '#e2e8f0', border: '1px solid #cbd5e1', color: '#94a3b8', padding: '8px 16px', borderRadius: '6px', cursor: 'not-allowed', fontSize: '13px' },
-  btnCloseModal: { backgroundColor: '#ffffff', border: '1px solid #e2e8f0', color: '#475569', padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }
+  // ACTIONS BAS DE FENÊTRE MODALE
+  modalFooter: { padding: '16px 24px', borderTop: '1px solid #334155', display: 'flex', justifyContent: 'space-between', gap: '12px', backgroundColor: '#121212', borderBottomLeftRadius: '8px', borderBottomRightRadius: '8px' },
+  btnDeleteActive: { backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', color: '#ef4444', padding: '8px 16px', borderRadius: '6px', fontWeight: '700', cursor: 'pointer', fontSize: '13px' },
+  btnDeleteDisabled: { backgroundColor: '#1e293b', border: '1px solid #334155', color: '#64748b', padding: '8px 16px', borderRadius: '6px', cursor: 'not-allowed', fontSize: '13px' },
+  btnCloseModal: { backgroundColor: '#1e1e1e', border: '1px solid #334155', color: '#cbd5e1', padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }
 };
 
 export default TicketsList;

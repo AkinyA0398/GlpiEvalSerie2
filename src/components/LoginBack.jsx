@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const LoginBack = () => {
@@ -70,7 +70,7 @@ const LoginBack = () => {
 
 const styles = {
   page: {
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#121212',
     minHeight: '100vh',
     display: 'flex',
     justifyContent: 'center',
@@ -82,12 +82,11 @@ const styles = {
   container: {
     maxWidth: '400px',
     width: '100%',
-    backgroundColor: '#ffffff',
-    border: '1px solid #e2e8f0',
+    backgroundColor: '#1e1e1e',
+    border: '1px solid #334155',
     borderRadius: '8px',
     padding: '32px',
-    boxSizing: 'border-box',
-    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
+    boxSizing: 'border-box'
   },
   header: {
     textAlign: 'center',
@@ -97,13 +96,13 @@ const styles = {
     margin: '0 0 6px 0',
     fontSize: '22px',
     fontWeight: '700',
-    color: '#0072ff',
+    color: '#00d2ff',
     letterSpacing: '0.5px'
   },
   subtitle: {
     margin: 0,
     fontSize: '13px',
-    color: '#64748b',
+    color: '#cbd5e1',
     lineHeight: '1.4'
   },
   alertError: {
@@ -112,9 +111,9 @@ const styles = {
     marginBottom: '20px',
     fontSize: '12px',
     fontWeight: '600',
-    backgroundColor: '#fee2e2',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
     border: '1px solid #ef4444',
-    color: '#dc2626',
+    color: '#ef4444',
     textAlign: 'center'
   },
   form: {
@@ -130,7 +129,7 @@ const styles = {
   label: {
     fontSize: '12px',
     fontWeight: '600',
-    color: '#475569',
+    color: '#cbd5e1',
     textTransform: 'uppercase',
     letterSpacing: '0.5px'
   },
@@ -138,10 +137,10 @@ const styles = {
     width: '100%',
     padding: '12px',
     fontSize: '14px',
-    backgroundColor: '#ffffff',
-    border: '1px solid #cbd5e1',
+    backgroundColor: '#121212',
+    border: '1px solid #334155',
     borderRadius: '6px',
-    color: '#0f172a',
+    color: '#f8fafc',
     boxSizing: 'border-box',
     outline: 'none',
     fontFamily: 'monospace',
@@ -152,14 +151,13 @@ const styles = {
     padding: '12px',
     fontSize: '14px',
     fontWeight: '700',
-    backgroundImage: 'linear-gradient(135deg, #0072ff 0%, #00c6ff 100%)',
-    color: '#ffffff',
+    backgroundColor: '#00d2ff',
+    color: '#121212',
     border: 'none',
     borderRadius: '6px',
     cursor: 'pointer',
-    transition: 'box-shadow 0.2s',
-    letterSpacing: '0.5px',
-    boxShadow: '0 4px 6px -1px rgba(0, 114, 255, 0.2)'
+    transition: 'background 0.2s',
+    letterSpacing: '0.5px'
   }
 };
 

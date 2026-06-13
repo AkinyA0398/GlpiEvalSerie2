@@ -1,6 +1,6 @@
 const BASE_URL = "http://glpi.localhost/apirest.php";
-const appToken = "DwC3GZB0ZsN4afeSf8LyVODH0ihvRydZ6FCsXD2p";
-const tokenUser = "LB9ecmIe3nCyKwIjgDNFeq6Q1E1oXvurQjMwW7ec";
+const appToken = "wEcFt3X7Ce1rXnwb3mMDi132vcLDmLbDQ8yeLJAH";
+const tokenUser = "RnmHgRxaokT1hXEzgp1cdwcAgmm8VI7TKPAb8jC2";
 
 export const apiGlpi = async (endpoint, options = {}) => {
   // Récupération dynamique du jeton de session stocké après l'initialisation
@@ -47,7 +47,7 @@ export const apiGlpi = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(url, config);
-
+    
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Erreur ${response.status}: ${errorText}`);

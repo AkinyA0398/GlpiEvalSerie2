@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useCsvParser, useTicketCsvParser, useCostCsvParser } from '../services/ParserCsv'; 
 import JSZip from 'jszip';
 import {  
@@ -12,9 +12,50 @@ import {
   addUserProfileAndEntity,
   addGlpiTicketCost, 
   uploadGlpiDocument, 
-  linkDocumentToItem
+  linkDocumentToItem,
+  updateGlpiTicketStatus
 } from '../services/CrudService';
 import { getGlpiUserId, createGlpiUser, linkUserToGroup } from '../services/testApi';
+
+// Fonction d'aide pour convertir le statut textuel du CSV en ID numérique GLPI
+const mapStatusToGlpiId = (statusStr) => {
+  // On nettoie les espaces et on passe en minuscules pour matcher tous les formats (ex: "In Progress" -> "inprogress")
+  const cleanStatus = String(statusStr).trim().toLowerCase().replace(/\s+/g, '');
+  
+  switch (cleanStatus) {
+    case 'new': case 'nouveau': case 'incoming': return 1;
+    case 'processing': case 'encours': case 'inprogress': return 2;
+    case 'planned': case 'planifie': case 'accepted': return 3;
+    case 'pending': case 'enattente': return 4;
+    case 'solved': case 'resolu': return 5;
+    case 'closed': case 'clos': return 6;
+    default: return 1;
+  }
+};
+
+/**
+ * Détection des "Magic Numbers" (Signatures Binaires)
+ * Analyse les premiers octets du fichier pour valider son type réel
+ */
+const checkRealImageType = async (fileBlob) => {
+  const buffer = await fileBlob.slice(0, 4).arrayBuffer();
+  const arr = new Uint8Array(buffer);
+  
+  let header = "";
+  for (let i = 0; i < arr.length; i++) {
+    header += arr[i].toString(16).toUpperCase().padStart(2, '0');
+  }
+
+  // Comparaison avec les signatures standards
+  if (header.startsWith("89504E47")) {
+    return { valid: true, mime: "image/png", ext: "png" };
+  }
+  if (header.startsWith("FFD8FF")) {
+    return { valid: true, mime: "image/jpeg", ext: "jpg" };
+  }
+  
+  return { valid: false, mime: null, ext: null };
+};
 
 const CsvDynamicTester = () => {
   const { data: devicesData, parseFile: parseDevicesFile } = useCsvParser({ separator: ',' });
@@ -46,8 +87,8 @@ const CsvDynamicTester = () => {
   const handleCostsUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      parseCostFile(file); // Utilisation directe du parser normalisé
-      addLog(`Fichier Coûts & Durées chargé et corrigé : ${file.name}`);
+      parseCostFile(file);
+      addLog(`Fichier Coûts & Durées chargé : ${file.name}`);
     }
   };
 
@@ -67,6 +108,7 @@ const CsvDynamicTester = () => {
 
     try {
       addLog("Initialisation de la session GLPI...");
+      
       addLog("Création des groupes...");
       const groupMap = {};
       await Promise.all(devicesData.locations.map(async (loc) => {
@@ -156,45 +198,62 @@ const CsvDynamicTester = () => {
         }));
       }
 
-      addLog("Création des équipements...");
-      for (const type in devicesData.devicesByType) {
-        await Promise.all(devicesData.devicesByType[type].map(async (device) => {
-          const details = {
-            name: device.name,
-            statusId: statusMap[device.statusName],
-            groupId: groupMap[device.locationName],
-            manufacturerId: manufacturerMap[device.manufacturerName],
-            modelId: modelMap[`${type}_${device.modelName}`],
-            inventoryNumber: device.inventoryNumber,
-            userId: userMap[device.userEmailOrName] || 0 
-          };
-          
-          const res = await createDetailedGlpiItem(type, details);
-          if (res && res.id) {
-            const glpiCorrectType = type.charAt(0).toUpperCase() + type.slice(1);
-            createdDevicesMap[device.name] = { id: res.id, type: glpiCorrectType };
-          }
-        }));
-      }
+      addLog("Dédoublonnage et création des équipements uniques...");
+for (const type in devicesData.devicesByType) {
+  // 1. Utilisation d'un dictionnaire pour écraser les doublons du CSV par leur nom
+  const uniqueDevices = {};
+  
+  devicesData.devicesByType[type].forEach(device => {
+    const cleanName = device.name.trim();
+    if (!cleanName) return;
+    
+    // Si l'équipement apparaît plusieurs fois, la dernière ligne lue met à jour les infos
+    uniqueDevices[cleanName] = {
+      name: cleanName,
+      statusId: statusMap[device.statusName],
+      groupId: groupMap[device.locationName],
+      manufacturerId: manufacturerMap[device.manufacturerName],
+      modelId: modelMap[`${type}_${device.modelName}`],
+      inventoryNumber: device.inventoryNumber,
+      userId: userMap[device.userEmailOrName] || 0 
+    };
+  });
 
+  // 2. Transformation du dictionnaire en tableau d'éléments uniques
+  const devicesToCreate = Object.values(uniqueDevices);
+  addLog(`   -> [${type}] : ${devicesToCreate.length} équipement(s) unique(s) trouvé(s) sur ${devicesData.devicesByType[type].length} lignes.`);
+
+  // 3. Envoi sécurisé des requêtes uniques à GLPI
+  await Promise.all(devicesToCreate.map(async (details) => {
+    try {
+      const res = await createDetailedGlpiItem(type, details);
+      if (res && res.id) {
+        const glpiCorrectType = type.charAt(0).toUpperCase() + type.slice(1);
+        createdDevicesMap[details.name] = { id: res.id, type: glpiCorrectType };
+      }
+    } catch (deviceErr) {
+      addLog(`   ❌ Échec de création du matériel [${details.name}] : ${deviceErr.message}`);
+    }
+  }));
+}
+
+      //  GESTION DU ZIP & SÉCURISATION BINAIRE DES IMAGES
       if (zipFile && Object.keys(createdDevicesMap).length > 0) {
-        addLog(`Désarchivage et traitement des images depuis : ${zipFile.name}...`);
+        addLog(`Désarchivage et inspection binaire des images depuis : ${zipFile.name}...`);
         try {
           const zip = new JSZip();
           const jsonContent = await zip.loadAsync(zipFile);
           
-          const imageFiles = Object.keys(jsonContent.files).filter(fileName => {
+          const potentialImageFiles = Object.keys(jsonContent.files).filter(fileName => {
             const isFolder = jsonContent.files[fileName].dir;
-            const isImage = /\.(jpe?g|png)$/i.test(fileName);
-            return !isFolder && isImage;
+            return !isFolder && /\.(jpe?g|png)$/i.test(fileName);
           });
 
-          addLog(`${imageFiles.length} image(s) détectée(s) dans le ZIP.`);
+          addLog(`${potentialImageFiles.length} fichier(s) graphique(s) potentiel(s) détecté(s).`);
 
-          for (const filePath of imageFiles) {
+          for (const filePath of potentialImageFiles) {
             const fileNameWithExt = filePath.split('/').pop();
             const assetKey = fileNameWithExt.replace(/\.[^/.]+$/, "").trim();
-
             const matchedAsset = createdDevicesMap[assetKey];
 
             if (!matchedAsset) {
@@ -203,23 +262,35 @@ const CsvDynamicTester = () => {
             }
 
             const fileData = await zip.files[filePath].async('blob');
-            const imageBlob = new File([fileData], fileNameWithExt, { type: fileData.type });
 
-            const uploadRes = await uploadGlpiDocument(imageBlob, fileNameWithExt);
+            //  Validation structurelle (Anti-renommage)
+            const realType = await checkRealImageType(fileData);
+
+            if (!realType.valid) {
+              addLog(`Rejet : Le fichier "${fileNameWithExt}" contient des entêtes binaires corrompus ou invalides (Renommage suspect détecté).`);
+              continue;
+            }
+
+            // Reconstruction propre du nom et correction du type MIME
+            const cleanFileName = `${assetKey}.${realType.ext}`;
+            const imageBlob = new File([fileData], cleanFileName, { type: realType.mime });
+
+            addLog(`   Type binaire validé pour "${fileNameWithExt}" [${realType.mime.toUpperCase()}]`);
+
+            const uploadRes = await uploadGlpiDocument(imageBlob, cleanFileName);
 
             if (uploadRes && uploadRes.id) {
               await linkDocumentToItem(uploadRes.id, matchedAsset.type, matchedAsset.id);
-              addLog(`   -> Image ${fileNameWithExt} liée à l'équipement : ${assetKey}`);
+              addLog(`   -> Image associée avec succès à l'équipement : ${assetKey}`);
             }
           }
         } catch (zipErr) {
-          addLog(`Échec de l'importation des images ZIP : ${zipErr.message}`);
-          console.error(zipErr);
+          addLog(`Échec du traitement du conteneur ZIP : ${zipErr.message}`);
         }
       }
 
       if (ticketData && ticketData.length > 0) {
-        addLog(`Traitement de ${ticketData.length} ticket(s) avec analyse ligne par ligne des coûts...`);
+        addLog(`Traitement de ${ticketData.length} ticket(s) avec cycle de vie sécurisé (Injection -> Clôture)...`);
 
         for (const ticket of ticketData) {
           try {
@@ -230,13 +301,12 @@ const CsvDynamicTester = () => {
             const csvDesc = ticket.description || "";
             const csvType = ticket.type || "Incident";
             const csvPriority = ticket.priority || "Medium";
-            const csvStatus = ticket.status || "New";
+            const csvStatusReal = ticket.status || "New"; 
 
             if (!csvRef || csvRef === "undefined" || csvRef === "") {
               continue; 
             }
 
-            // Formattage de la date pour GLPI
             const [day, month, year] = csvDate.split('/');
             const formattedDate = `${year}-${month}-${day}`;
             let formattedTime = csvTime;
@@ -245,48 +315,41 @@ const CsvDynamicTester = () => {
             }
             const finalGlpiDateTime = `${formattedDate} ${formattedTime}`;
 
-            // 1. Récupération de TOUTES les lignes correspondantes à ce ticket dans le CSV de coûts
             const matchedCostRows = costData.filter(c => String(c.tickets_id).trim() === csvRef);
-
-            // Pour la création du ticket principal, on calcule la durée cumulée totale
             const totalDurationSeconds = matchedCostRows.reduce((sum, row) => sum + (parseInt(row.actiontime, 10) || 0), 0);
 
-            // 2. Création du ticket principal dans GLPI
+            // 1. CRÉATION FORCEE EN STATUT "NOUVEAU" (ID 1)
             const ticketRes = await createGlpiTicket({
               title: csvTitle,
               description: csvDesc,
               type: csvType,
               priority: csvPriority,
-              status: csvStatus,
+              status: "New", 
               fullDateTime: finalGlpiDateTime,
-              duration: totalDurationSeconds, // Durée totale de toutes les interventions cumulées
+              duration: totalDurationSeconds, 
               externalRef: csvRef
             });
 
             const newTicketId = ticketRes.id;
-            // await updateTicketExternalId(newTicketId, csvRef);
             
             if (newTicketId) {
-              addLog(`Ticket #${newTicketId} créé (Ref CSV: ${csvRef}) | Durée Globale: ${totalDurationSeconds}s`);
+              addLog(`Ticket #${newTicketId} initialisé au statut [NOUVEAU] (Ref CSV: ${csvRef})`);
 
-              // 3. ENVOI SÉPARÉ DE CHAQUE LIGNE DE COÛT TRACÉE
+              // 2. INJECTION DES SEGMENTS FINANCIERS
               if (matchedCostRows.length > 0) {
                 for (const row of matchedCostRows) {
                   const fCost = parseFloat(row.cost_fixed) || 0.00;
                   const tCost = parseFloat(row.cost_time) || 0.00;
                   const duration = parseInt(row.actiontime, 10) || 0;
 
-                  // On pousse à GLPI si la ligne contient au moins une info financière ou temporelle
                   if (fCost > 0 || tCost > 0 || duration > 0) {
                     await addGlpiTicketCost(newTicketId, fCost, tCost, duration);
-                    addLog(`   -> Segment financier injecté | Fixe: ${fCost} MGA | Horaire: ${tCost} MGA | Durée: ${duration}s`);
+                    addLog(`   -> Segment financier rattaché (${duration}s)`);
                   }
                 }
-              } else {
-                addLog(`   Aucun coût trouvé dans le fichier pour la Ref CSV: ${csvRef}`);
               }
 
-              // 4. Liaison des équipements associés au ticket
+              // 3. LIAISON DES ÉQUIPEMENTS
               let itemsArray = ticket.items || [];
               if (itemsArray.length > 0) {
                 for (const itemName of itemsArray) {
@@ -294,11 +357,19 @@ const CsvDynamicTester = () => {
                   if (matchedDevice) {
                     await linkItemToTicket(newTicketId, matchedDevice.type, matchedDevice.id);
                     addLog(`   -> Équipement lié : ${itemName} (${matchedDevice.type})`);
-                  } else {
-                    addLog(`   -> Matériel "${itemName}" absent du parc.`);
                   }
                 }
               }
+
+            const finalStatusId = mapStatusToGlpiId(csvStatusReal);
+            if (finalStatusId !== 1) {
+              try {
+                await updateGlpiTicketStatus(newTicketId, finalStatusId);
+                addLog(`   -> Cycle finalisé avec succès vers le statut : [${csvStatusReal.toUpperCase()}]`);
+              } catch (putError) {
+                addLog(`   ⚠️ Impossible d'appliquer le statut final au ticket #${newTicketId} : ${putError.message}`);
+              }
+            }
             }
 
           } catch (ticketError) {
@@ -322,7 +393,6 @@ const CsvDynamicTester = () => {
       </div>
 
       <div style={styles.grid}>
-        {/* Fichier 1 */}
         <div style={styles.card}>
           <div style={styles.cardHeader}>1. Structure & Parc informatique</div>
           <div style={styles.inputWrapper}>
@@ -332,7 +402,6 @@ const CsvDynamicTester = () => {
           </div>
         </div>
 
-        {/* Fichier 2 */}
         <div style={styles.card}>
           <div style={styles.cardHeader}>2. Registre des Tickets d'Assistance</div>
           <div style={styles.inputWrapper}>
@@ -342,7 +411,6 @@ const CsvDynamicTester = () => {
           </div>
         </div>
 
-        {/* Fichier 3 */}
         <div style={styles.card}>
           <div style={styles.cardHeader}>3. Grille de Tarification & Coûts</div>
           <div style={styles.inputWrapper}>
@@ -352,7 +420,6 @@ const CsvDynamicTester = () => {
           </div>
         </div>
 
-        {/* Fichier 4 */}
         <div style={styles.card}>
           <div style={styles.cardHeader}>4. Album d'Images des Équipements</div>
           <div style={styles.inputWrapper}>
@@ -386,25 +453,25 @@ const CsvDynamicTester = () => {
 };
 
 const styles = {
-  page: { backgroundColor: '#f1f5f9', color: '#0f172a', fontFamily: 'system-ui, -apple-system, sans-serif', minHeight: '100vh', padding: '30px' },
+  page: { backgroundColor: '#121212', color: '#f8fafc', fontFamily: 'system-ui, -apple-system, sans-serif', minHeight: '100vh', padding: '30px' },
   header: { marginBottom: '32px' },
-  mainTitle: { fontSize: '24px', fontWeight: '700', color: '#0072ff', margin: '0 0 8px 0' },
-  subtitle: { fontSize: '14px', color: '#64748b', margin: 0 },
+  mainTitle: { fontSize: '24px', fontWeight: '700', color: '#00d2ff', margin: '0 0 8px 0' },
+  subtitle: { fontSize: '14px', color: '#cbd5e1', margin: 0 },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '32px' },
-  card: { backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' },
-  cardHeader: { fontSize: '14px', fontWeight: '600', color: '#475569', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' },
+  card: { backgroundColor: '#1e1e1e', border: '1px solid #334155', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' },
+  cardHeader: { fontSize: '14px', fontWeight: '600', color: '#cbd5e1', borderBottom: '1px solid #334155', paddingBottom: '10px' },
   inputWrapper: { display: 'flex', flexDirection: 'column', gap: '10px' },
   fileInput: { display: 'none' },
-  fileLabel: { display: 'block', textAlign: 'center', backgroundColor: '#f8fafc', border: '1px dashed #cbd5e1', color: '#0072ff', padding: '10px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', transition: 'all 0.2s' },
-  badgeSuccess: { backgroundColor: '#ecfdf5', border: '1px solid #10b981', color: '#059669', padding: '6px 12px', borderRadius: '4px', fontSize: '12px', textAlign: 'center', fontWeight: '600' },
+  fileLabel: { display: 'block', textAlign: 'center', backgroundColor: 'transparent', border: '1px solid #334155', color: '#00d2ff', padding: '10px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', transition: 'all 0.2s' },
+  badgeSuccess: { backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', color: '#10b981', padding: '6px 12px', borderRadius: '4px', fontSize: '12px', textAlign: 'center', fontWeight: '600' },
   actionSection: { display: 'flex', justifyContent: 'center', marginBottom: '32px' },
-  btnActive: { backgroundImage: 'linear-gradient(135deg, #0072ff 0%, #00c6ff 100%)', color: '#ffffff', border: 'none', padding: '14px 40px', borderRadius: '6px', cursor: 'pointer', fontWeight: '700', fontSize: '15px', transition: 'box-shadow 0.2s', textTransform: 'uppercase', letterSpacing: '0.5px', boxShadow: '0 4px 6px -1px rgba(0, 114, 255, 0.2)' },
-  btnDisabled: { backgroundColor: '#e2e8f0', color: '#94a3b8', border: '1px solid #cbd5e1', padding: '14px 40px', borderRadius: '6px', cursor: 'not-allowed', fontWeight: '700', fontSize: '15px' },
-  terminalContainer: { backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '20px', fontFamily: 'Consolas, Monaco, monospace', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' },
-  terminalHeader: { fontSize: '13px', fontWeight: '600', color: '#0072ff', textTransform: 'uppercase', marginBottom: '14px', letterSpacing: '0.5px' },
+  btnActive: { backgroundColor: '#00d2ff', color: '#121212', border: 'none', padding: '14px 40px', borderRadius: '6px', cursor: 'pointer', fontWeight: '700', fontSize: '15px', transition: 'background 0.2s', textTransform: 'uppercase', letterSpacing: '0.5px' },
+  btnDisabled: { backgroundColor: '#1e293b', color: '#64748b', border: '1px solid #334155', padding: '14px 40px', borderRadius: '6px', cursor: 'not-allowed', fontWeight: '700', fontSize: '15px' },
+  terminalContainer: { backgroundColor: '#121212', border: '1px solid #334155', borderRadius: '8px', padding: '20px', fontFamily: 'Consolas, Monaco, monospace' },
+  terminalHeader: { fontSize: '13px', fontWeight: '600', color: '#00d2ff', textTransform: 'uppercase', marginBottom: '14px', letterSpacing: '0.5px' },
   terminalContent: { height: '260px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px' },
   emptyLog: { color: '#64748b', fontSize: '13px', fontStyle: 'italic' },
-  logLine: { fontSize: '13px', color: '#475569', borderLeft: '2px solid #e2e8f0', paddingLeft: '8px', lineHeight: '1.4' }
+  logLine: { fontSize: '13px', color: '#cbd5e1', borderLeft: '2px solid #334155', paddingLeft: '8px', lineHeight: '1.4' }
 };
 
 export default CsvDynamicTester;

@@ -1,5 +1,5 @@
+import React from 'react';
 import { createBrowserRouter, RouterProvider, Navigate, useNavigate } from 'react-router-dom';
-
 import TestUsers from './components/TestUsers';
 import AddUser from './components/addUser';
 import FormulaireSquelette from './squelette/Formulaire';
@@ -12,11 +12,15 @@ import GlpiItemList from './components/GlpiItemList';
 import CreateTicket from './components/CreateTicket';
 import GlpiDashboard from './components/GlpiDashboard';
 import TicketsList from './components/TicketsList';
-import FrontOfficeKanban from './components/FrontOfficeKanban';
 
+// Importation de tes deux nouveaux layouts séparés
+import BackOfficeLayout from './components/BackOfficeLayout';
+import FrontOfficeLayout from './components/FrontOfficeLayout';
 
-import AdminLayout from './components/AdminLayout';
 import ResetData from './components/ResetData';
+import TicketsListKanban from './components/TicketsListKanban';
+import StatusConfigPage from './components/StatusConfigPage';
+import TicketsCost from './components/TicketsCost';
 
 const Login = () => {
   const navigate = useNavigate(); 
@@ -54,10 +58,13 @@ const styles = {
 };
 
 const router = createBrowserRouter([
-  // --- ROUTES PUBLIQUES / FRONTOFFICE ---
+  // --- ROUTES PUBLIQUES (SANS LAYOUT COMPLEXE) ---
   {
     path: '/',
     element: <Home />
+  },{
+    path: '/cost',
+    element: <TicketsCost />
   },
   {
     path: '/login',
@@ -67,64 +74,87 @@ const router = createBrowserRouter([
     path: '/LoginBack',
     element: <LoginBack />
   },
+
+  // --- ROUTES FRONTOFFICE / ESPACE SUPPORT (ENCAPSULÉES) ---
   {
     path: '/list',
-    element: <GlpiItemList />
+    element: (
+      <FrontOfficeLayout>
+        <GlpiItemList />
+      </FrontOfficeLayout>
+    )
   },
   {
-    path: '/ticket', // Création de ticket utilisateur
-    element: <CreateTicket />
+    path: '/ticket', 
+    element: (
+      <FrontOfficeLayout>
+        <CreateTicket />
+      </FrontOfficeLayout>
+    )
   },
 
-  // --- ROUTES BACKOFFICE (PROTÉGÉES + LAYOUT COMMUN) ---
+  // --- ROUTES BACKOFFICE / ADMINISTRATION (PROTÉGÉES + BACKOFFICE LAYOUT) ---
   {
     path: '/admin',
     element: (
       <ProtectedAdmin>
-        <AdminLayout>
+        <BackOfficeLayout>
           <GlpiDashboard />
-        </AdminLayout>
+        </BackOfficeLayout>
       </ProtectedAdmin>
     )
   },
-  // --- EN FRONT OFFICE ---
   {
-    path: '/front',
-    element: <FrontOfficeKanban />
+    path: '/statusConfig',
+    element: (
+      <ProtectedAdmin>
+        <BackOfficeLayout>
+          <StatusConfigPage />
+        </BackOfficeLayout>
+      </ProtectedAdmin>
+    )
   },
-
+  {
+    path: '/ticketkanban',
+    element: (
+        <FrontOfficeLayout>
+          <TicketsListKanban />
+        </FrontOfficeLayout>
+      
+    )
+  },
   {
     path: '/adminTicket',
     element: (
       <ProtectedAdmin>
-        <AdminLayout>
+        <BackOfficeLayout>
           <TicketsList />
-        </AdminLayout>
+        </BackOfficeLayout>
       </ProtectedAdmin>
     )
   },
   {
-    path: '/testCsv', // Page pour importer tes 4 fichiers (3 CSV + 1 ZIP)
+    path: '/testCsv', 
     element: (
       <ProtectedAdmin>
-        <AdminLayout>
+        <BackOfficeLayout>
           <CsvDynamicTester />
-        </AdminLayout>
+        </BackOfficeLayout>
       </ProtectedAdmin>
     )
   },
   {
-    path: '/admin/reset', // Page dédiée pour la réinitialisation de l'application
+    path: '/admin/reset', 
     element: (
       <ProtectedAdmin>
-        <AdminLayout>
+        <BackOfficeLayout>
           <ResetData />
-        </AdminLayout>
+        </BackOfficeLayout>
       </ProtectedAdmin>
     )
   },
 
-  // --- ANCIENNES ROUTES DE TEST (À GARDER OU TRIER PLUS TARD) ---
+  // --- ANCIENNES ROUTES DE TEST ---
   {
     path: '/tableau',
     element: (
