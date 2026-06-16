@@ -215,10 +215,10 @@ const TicketsCost = () => {
               
                   {item.hardwareType} ({item.count})
                 </td>
-                <td style={{ ...styles.tdCost, color: '#e2e8f0' }}>
+                <td style={{ ...styles.tdCost, color: '#416ea8ff' }}>
                   {item.reouverture.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} 
                 </td>
-                <td style={{ ...styles.tdCost, color: '#f8fafc' }}>
+                <td style={{ ...styles.tdCost, color: '#346291ff' }}>
                   {item.glpiCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} 
                 </td>
                 <td style={{ ...styles.tdCost, color: '#38bdf8' }}>
@@ -233,7 +233,7 @@ const TicketsCost = () => {
             {/* LIGNE DE TOTAL GLOBAL */}
             <tr style={styles.totalRow}>
               <td style={styles.tdTotalLabel}>TOTAL PARC INFORMATIQUE</td>
-              <td style={{ ...styles.tdTotalValue, color: '#cbd5e1' }}>
+              <td style={{ ...styles.tdTotalValue, color: '#25548eff' }}>
                 {grandTotalReouverture.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} 
               </td>
               <td style={styles.tdTotalValue}>
