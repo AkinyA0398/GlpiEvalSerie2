@@ -90,9 +90,12 @@ const ResumeTicket = () => {
 
   useEffect(() => {
     let isMounted = true;
-    if (isMounted) {
-      loadAllCostData();
-    }
+    const fetchAndLoad = async () => {
+      if (isMounted) {
+        await loadAllCostData();
+      }
+    };
+    fetchAndLoad();
     return () => { isMounted = false; };
   }, [loadAllCostData]);
 

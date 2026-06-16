@@ -1,0 +1,9 @@
+new page import, mouvement de alea 1 et 2 (alea 1 et 2 deja fini)
+csv 3 colonnes : ticket, mvt, valeur
+2, open, 5 (ticket 2 reopen 5%)
+2, cancel (anuler ticket 2)
+2, close, 100 (ticket 2 terminer cout 100)
+
+categorie details : item dans dashboard (ajouts details : reouverture, reopen, close, supercost, origin cost, sum)
+
+

@@ -18,8 +18,6 @@ export const apiGlpi = async (endpoint, options = {}) => {
 
   // 2. GESTION DYNAMIQUE DU CONTENT-TYPE (Sécurisation des fichiers ZIP/Images)
   if (options.body instanceof FormData) {
-    // ⚠️ On laisse le navigateur gérer le Content-Type pour le multipart/form-data
-    // Ne SURTOUT PAS mettre 'application/json' ni 'multipart/form-data' manuellement
     if (headers['Content-Type']) {
       delete headers['Content-Type'];
     }

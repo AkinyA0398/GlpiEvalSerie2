@@ -45,7 +45,7 @@ const splitCsvLine = (line) => {
 /**
  * Hook de parsing pour les fichiers du parc informatique
  */
-export function useCsvParser({ separator = ',', hasHeader = true }) {
+export function useCsvParser({ hasHeader = true }) {
   const [data, setData] = useState({
     devicesByType: {}, 
     statuses: [],
@@ -277,6 +277,92 @@ export function useCostCsvParser({ separator = ',', hasHeader = true } = {}) {
               // Optionnel : calcul du coût total local pour tes tableaux d'affichage
               total_cost_calculated: (parseFloat(cleanFixedCost) || 0) + 
                 ((parseFloat(cleanTimeCost) || 0) * (parseInt(durationSecond, 10) / 3600))
+            });
+          }
+        }
+
+        setCostData(parsedCosts);
+
+      } catch (err) {
+        console.error("Erreur lors du parsing du fichier de coûts :", err);
+        setError(err.message || "Échec du traitement des données financières.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    reader.onerror = () => {
+      setError("Erreur lors de la lecture physique du fichier de coûts.");
+      setLoading(false);
+    };
+
+    reader.readAsText(file);
+  };
+
+  const clearCosts = () => {
+    setCostData([]);
+    setError(null);
+  };
+
+  return { costData, loading, error, parseCostFile, clearCosts };
+}
+export function useSuperCostCsvParser({ separator = ',', hasHeader = true } = {}) {
+  const [costData, setCostData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const splitCsvLine = (line, sep) => {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === sep && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  };
+
+  const parseCostFile = (file) => {
+    if (!file) return;
+    setLoading(true);
+    setError(null);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result;
+        if (!text) throw new Error("Le fichier de super coûts est vide.");
+
+        const lines = text.split(/\r?\n/);
+        const parsedCosts = [];
+
+        const startRow = hasHeader ? 1 : 0;
+
+        for (let i = startRow; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue; 
+
+          const fields = splitCsvLine(line, separator);
+
+          const [numTicket, mvt, valeur] = fields;
+
+          const cleanValeur = parseFloat(valeur) || 0;
+          const ticketId = parseInt(numTicket, 10);
+          
+          if (!isNaN(ticketId)) {
+            parsedCosts.push({
+              tickets_id: ticketId,
+              status: mvt ? mvt.trim() : '', 
+              valeur: cleanValeur              
             });
           }
         }

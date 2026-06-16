@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { fetchGlpiItems, fetchGlpiDocumentItems, fetchGlpiDocumentImage } from '../services/CrudService';
 import { apiGlpi } from '../api/apiGlpi';
 
@@ -19,116 +19,14 @@ const GlpiItemList = () => {
   const [manufacturersList, setManufacturersList] = useState([]);
 
   // Vérification de la session pour savoir s'il faut inclure le Layout admin
-  const isAdmin = localStorage.getItem('adminSession') === 'admin';
+
 
   useEffect(() => {
     loadAllData();
   }, []);
 
-  const loadAllData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      let manufacturerMap = {};
-      let statusMap = {};
-
-      // 1. Récupération des dictionnaires de correspondances
-      try {
-        const [manufacturersData, statusesData] = await Promise.all([
-          apiGlpi('Manufacturer').catch(() => []),
-          apiGlpi('State').catch(() => [])
-        ]);
-
-        if (Array.isArray(manufacturersData)) {
-          manufacturersData.forEach(m => { manufacturerMap[m.id] = m.name; });
-        }
-        if (Array.isArray(statusesData)) {
-          statusesData.forEach(s => { statusMap[s.id] = s.name; });
-        }
-      } catch (e) {
-        console.warn("Erreur lors du chargement des dictionnaires GLPI :", e);
-      }
-
-      // 2. Récupération des éléments du parc matériel
-      const typesToFetch = ['Computer', 'Monitor', 'Phone']; 
-      const itemsPromises = typesToFetch.map(async (type) => {
-        try {
-          const res = await fetchGlpiItems(type);
-          const cleanItems = Array.isArray(res) ? res : [];
-          return cleanItems.map(item => ({ ...item, itemtype: type }));
-        } catch {
-          return []; 
-        }
-      });
-
-      const allItemsResults = await Promise.all(itemsPromises);
-      const combinedItems = allItemsResults.flat();
-
-      // 3. Récupération de la table des liaisons de documents
-      let docItemsMap = {};
-      try {
-        const docItems = await fetchGlpiDocumentItems();
-        if (Array.isArray(docItems)) {
-          docItems.forEach(link => {
-            const key = `${link.itemtype}-${link.items_id}`;
-            docItemsMap[key] = link.documents_id;
-          });
-        }
-      } catch (e) {
-        console.warn("Impossible de charger les liaisons d'images :", e);
-      }
-
-      // 4. Reconstruction des objets et RÉSOLUTION SIMULTANÉE des images de type Blob
-
-const enrichedItems = await Promise.all(
-  combinedItems.map(async (item) => {
-    const key = `${item.itemtype}-${item.id}`;
-    // Ajoute ce log temporaire pour voir la clé générée
-    if (item.name === "PC-COMPTA-001") {
-      console.log(`Test pour PC-COMPTA-001 -> Clé générée: ${key}, Trouvé en map ?`, docItemsMap[key]);
-    }
-    
-    const documentId = docItemsMap[key] || null;
-          let imageUrl = null;
-
-          // Si un document est lié, on télécharge immédiatement le Blob d'image
-          if (documentId) {
-            try {
-              imageUrl = await fetchGlpiDocumentImage(documentId);
-            } catch (imgErr) {
-              console.error(`Erreur Blob sur document ID ${documentId}:`, imgErr);
-            }
-          }
-
-          return {
-            ...item,
-            manufacturerName: manufacturerMap[item.manufacturers_id] || "Inconnu",
-            statusName: statusMap[item.states_id] || "Par defaut",
-            documentId,
-            imageUrl
-          };
-        })
-      );
-
-      // 5. Unique mise à jour de l'état avec l'ensemble des données prêtes
-      setItems(enrichedItems);
-
-      // Génération des listes de filtres uniques
-      const uniqueStatuses = [...new Set(enrichedItems.map(i => i.statusName))];
-      const uniqueManufacturers = [...new Set(enrichedItems.map(i => i.manufacturerName))];
-      
-      setStatusesList(uniqueStatuses);
-      setManufacturersList(uniqueManufacturers);
-
-    } catch (err) {
-      setError(`Erreur lors du chargement des composants : ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const filteredItems = items.filter(item => {
-    const matchesSearch = searchQuery === '' || 
+    const matchesSearch = searchQuery === '' ||
       (item.name && item.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (item.inventoryNumber && item.inventoryNumber.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (item.serial && item.serial.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -168,9 +66,9 @@ const enrichedItems = await Promise.all(
       <div style={styles.filterSection}>
         <div style={styles.filterGroup}>
           <label style={styles.filterLabel}>Recherche globale</label>
-          <input 
-            type="text" 
-            placeholder="Nom, num inventaire, serie..." 
+          <input
+            type="text"
+            placeholder="Nom, num inventaire, serie..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={styles.input}
@@ -211,17 +109,17 @@ const enrichedItems = await Promise.all(
       <div style={styles.grid}>
         {filteredItems.map((item, index) => (
           <div key={`${item.itemtype || 'item'}-${item.id || index}-${index}`} style={styles.card}>
-            
+
             {/* ZONE IMAGE BLOB / COUVERTURE */}
             <div style={styles.imageContainer}>
               {item.imageUrl ? (
-                <img 
-                  src={item.imageUrl} 
-                  alt={item.name} 
+                <img
+                  src={item.imageUrl}
+                  alt={item.name}
                   style={styles.image}
                   onError={(e) => {
-                    e.target.onerror = null; 
-                    e.target.src = "https://placehold.co/280x160/F1F3F9/8B92A8?text=Image+Indisponible";
+                    e.target.onerror = null;
+                    e.target.src = "https://placehold.co/280x160/1e1e1e/64748b?text=Image+Indisponible";
                   }}
                 />
               ) : (
@@ -262,7 +160,7 @@ const enrichedItems = await Promise.all(
     </div>
   );
 
-  return  <div style={styles.standalonePage}>{renderContent()}</div>;
+  return <div style={styles.standalonePage}>{renderContent()}</div>;
 };
 
 const styles = {

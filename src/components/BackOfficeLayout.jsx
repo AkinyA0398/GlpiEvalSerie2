@@ -23,6 +23,8 @@ const BackOfficeLayout = ({ children }) => {
           <Link to="/statusConfig" style={styles.navLink}>Config statuts</Link>
           <Link to="/testCsv" style={styles.navLink}>Importation CSV</Link>
           <Link to="/resumeticket" style={styles.navLink}>Résumé Tickets</Link>
+          <Link to="/cost" style={styles.navLink}>Coût des Tickets</Link>
+          <Link to="/CsvMvt" style={styles.navLink}>Import Mouvement</Link>
           <Link to="/admin/reset" style={styles.navLink}>Reinitialisation</Link>
           <Link to="/list" style={styles.navLinkPublic}>Retour Vue Publique</Link>
         </nav>

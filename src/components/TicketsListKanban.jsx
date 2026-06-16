@@ -1,18 +1,21 @@
-import { useState, useEffect, useCallback } from 'react';
-import { fetchGlpiTickets } from '../services/CrudService'; 
+import React, { useState, useEffect } from 'react';
+import { fetchGlpiTickets, deleteGlpiTicket } from '../services/CrudService'; 
 import { apiGlpi } from '../api/apiGlpi';
 import { apiLocalStatus } from '../api/configApi'; 
 
 const TicketsListKanban = () => {
   const [tickets, setTickets] = useState([]);
-  const [news,setNews] = useState([]);
+  const [news, setNews] = useState([]);
   const [kanbanStatuses, setKanbanStatuses] = useState([]); 
   const [technicians, setTechnicians] = useState([]); 
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [VAleur,setVAleur]=useState(0);
+  const [VAleur, setVAleur] = useState(0);
+  const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
+  const [ticketDetail, setTicketDetails] = useState([]);
   const [allLinks, setAllLinks] = useState([]);
+  const [allCosts, setAllCosts] = useState([]);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -22,7 +25,7 @@ const TicketsListKanban = () => {
   const [selectedTechId, setSelectedTechId] = useState('');
   const [pendingDropData, setPendingDropData] = useState(null);
 
-  // ÉTATS POUR LES POPUPS DE JUSTIFICATION (REMPLACEMENT WINDOW.PROMPT)
+  // ÉTATS POUR LES POPUPS DE JUSTIFICATION
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [actionModalConfig, setActionModalConfig] = useState({ title: '', label: '', ticketId: null, targetStatusId: null, currentStatusId: null, draggedTicket: null, technicianId: null });
   const [actionReason, setActionReason] = useState({
@@ -39,6 +42,8 @@ const TicketsListKanban = () => {
     status: 1       
   });
 
+  const priorityLabels = { 1: 'Très basse', 2: 'Basse', 3: 'Moyenne', 4: 'Haute', 5: 'Très haute' };
+  const typeLabels = { 1: 'Incident', 2: 'Demande' };
 
   const CURRENT_LANG = localStorage.getItem('kanban_lang') || 'fr'; 
 
@@ -46,7 +51,11 @@ const TicketsListKanban = () => {
   const STATUS_IN_PROGRESS = 2; 
   const STATUS_CLOSED = 6;      
 
-  const loadAllTicketsData = useCallback(async () => {
+  useEffect(() => {
+    loadAllTicketsData();
+  }, []);
+
+  const loadAllTicketsData = async () => {
     setLoading(true);
     try {
       const localStatuses = await apiLocalStatus(`status?lang=${CURRENT_LANG}`);
@@ -75,6 +84,7 @@ const TicketsListKanban = () => {
       
       setTickets(kanbanTickets);
       setAllLinks(Array.isArray(linksRes) ? linksRes : []);
+      setAllCosts(Array.isArray(costsRes) ? costsRes : []);
 
       const cleanUsers = Array.isArray(usersRes) ? usersRes : [];
       setTechnicians(cleanUsers.map(u => ({ id: u.id, name: u.name || u.realname || u.name })));
@@ -85,15 +95,7 @@ const TicketsListKanban = () => {
     } finally {
       setLoading(false);
     }
-  }, [CURRENT_LANG]);
-
-    useEffect(() => {
-    let isMounted = true;
-    if (isMounted) {
-      loadAllTicketsData();
-    }
-    return () => { isMounted = false; };
-  }, [loadAllTicketsData]);
+  };
 
   const handleDragStart = (e, ticketId) => {
     e.dataTransfer.setData('text/plain', ticketId);
@@ -102,78 +104,75 @@ const TicketsListKanban = () => {
   const handleDragOver = (e) => {
     e.preventDefault();
   };
-const Annuler = async (e, ticketId) => {
-  e.preventDefault();
-  try {
-    // Suppression des coûts locaux pour ce ticket
-    await apiLocalStatus(`cost/${ticketId}`, {
-      method: 'DELETE'
-    });
-    
-    // Poursuite du flux GLPI
-    const { targetStatusId, currentStatusId, draggedTicket, technicianId } = actionModalConfig;
-    processTicketUpdate(ticketId, targetStatusId, currentStatusId, draggedTicket, technicianId);
-  } catch (err) {
-    console.error("Erreur lors de l'annulation du coût :", err);
-  }
-}; 
 
-const reouverturAnnuler = async (e) => {
-  e.preventDefault();
-  
-  try {
-    if (news && news.item) {
-      for (let listItem of news.item) {
-        const url = `costLast?itemtype=${listItem.item_id}&id_ticket=${news.idTicket}`;
-        const localStatuses = await apiLocalStatus(url);
-        
-        const lastCost = (localStatuses && localStatuses.length > 0) ? localStatuses[0].cost : 0;
-        
-        let valiny = (lastCost * Number(VAleur)) / 100;
-        
-        let editingStatus = { 
-          item_id: listItem.item_id,
-          cost: valiny || 0,
-          ticket_id: news.idTicket
-        };
-        
-        await apiLocalStatus('costPrix', {
-          method: 'POST',
-          body: JSON.stringify(editingStatus)
-        });
-      }
+  const Annuler = async (e, ticketId) => {
+    e.preventDefault();
+    try {
+      await apiLocalStatus(`cost/${ticketId}`, {
+        method: 'DELETE'
+      });
+      
+      const { targetStatusId, currentStatusId, draggedTicket, technicianId } = actionModalConfig;
+      processTicketUpdate(ticketId, targetStatusId, currentStatusId, draggedTicket, technicianId);
+    } catch (err) {
+      console.error("Erreur lors de l'annulation du coût :", err);
     }
-    
-    setVAleur(0);
-    
-    const { ticketId, targetStatusId, currentStatusId, draggedTicket, technicianId } = actionModalConfig;
-    processTicketUpdate(ticketId, targetStatusId, currentStatusId, draggedTicket, technicianId);
-    
-  } catch (err) {
-    console.error("Erreur lors du recalcul de réouverture :", err);
-  }
-};
+  }; 
+
+  const reouverturAnnuler = async (e) => {
+    e.preventDefault();
+    try {
+      if (news && news.item) {
+        const gp = Date.now();
+
+        for (let listItem of news.item) {
+          const url = `costLast?itemtype=${listItem.item_id}&id_ticket=${news.idTicket}`;
+          const localStatuses = await apiLocalStatus(url);
+          
+          const lastCost = (localStatuses && localStatuses.length > 0) ? localStatuses[0].cost : 0;
+          let valiny = (lastCost * Number(VAleur)) / 100;
+          
+          let editingStatus = { 
+            item_id: listItem.item_id,
+            cost: valiny || 0,
+            ticket_id: news.idTicket,
+            gp: gp
+          };
+          
+          await apiLocalStatus('costPrix', {
+            method: 'POST',
+            body: JSON.stringify(editingStatus)
+          });
+        }
+      }
+      
+      setVAleur(0);
+      const { ticketId, targetStatusId, currentStatusId, draggedTicket, technicianId } = actionModalConfig;
+      processTicketUpdate(ticketId, targetStatusId, currentStatusId, draggedTicket, technicianId);
+      
+    } catch (err) {
+      console.error("Erreur lors du recalcul de réouverture :", err);
+    }
+  };
+
   const handleDrop = async (e, targetStatusId) => {
     e.preventDefault();
     const ticketId = parseInt(e.dataTransfer.getData('text/plain'), 10);
     
     const draggedTicket = tickets.find(t => t.id === ticketId);
     const linkedItems = allLinks.filter(item => parseInt(item.tickets_id, 10) === ticketId);
-    const ilaina={idTicket:ticketId,item:[]};
+    const ilaina = { idTicket: ticketId, item: [] };
+
     for (const links of linkedItems) {
-        let editingStatus = { 
-          item_id: links.itemtype
-        };
-        ilaina.item.push(editingStatus);
-      }
-      console.log("edit",ilaina);
+      let editingStatus = { item_id: links.itemtype };
+      ilaina.item.push(editingStatus);
+    }
     setNews(ilaina);
     if (!draggedTicket) return;
 
     const currentStatusId = parseInt(draggedTicket.status, 10);
     if (currentStatusId === targetStatusId) return;
 
-    // --- RÈGLE 1 : INTERCEPTION POUR ASSIGNATION D'UN TECHNICIEN ---
     if (currentStatusId === STATUS_NEW && targetStatusId === STATUS_IN_PROGRESS) {
       if (technicians.length === 0) {
         alert("Aucun technicien disponible dans le système GLPI.");
@@ -198,7 +197,6 @@ const reouverturAnnuler = async (e) => {
   };
 
   const processTicketUpdate = async (ticketId, targetStatusId, currentStatusId, draggedTicket, technicianId) => {
-    // --- INTERCEPTION POUR LE FORMULAIRE DE CLÔTURE ---
     if (targetStatusId === STATUS_CLOSED && !actionModalConfig.ticketId) {
       setActionReason({ cost: '', category: '', comment: '' });
       setActionModalConfig({
@@ -210,7 +208,6 @@ const reouverturAnnuler = async (e) => {
       return;
     } 
     
-    // --- INTERCEPTION POUR LE FORMULAIRE DE RÉOUVERTURE ---
     if (currentStatusId === STATUS_CLOSED && targetStatusId !== STATUS_CLOSED && !actionModalConfig.ticketId) {
       setActionReason({ cost: '', category: '', comment: '' });
       setActionModalConfig({
@@ -224,36 +221,31 @@ const reouverturAnnuler = async (e) => {
 
     let updatePayload = { input: { id: ticketId, status: targetStatusId } };
     let rawComment = ""; 
-    
     const linkedItems = allLinks.filter(item => parseInt(item.tickets_id, 10) === ticketId);
 
-    // --- TRAITEMENT LOGIQUE SELON L'ACTION COCHÉE ---
     if (targetStatusId === STATUS_CLOSED) {
-      console.log("Clôture du ticket ID:", ticketId);
       const chosenCost = Number(actionReason.cost) || 0;
-
+      const gp = Date.now();
       for (const links of linkedItems) {
         let editingStatus = { 
-          ticket_id:ticketId,
-          cost:chosenCost/linkedItems.length,
-          item_id:links.itemtype
+          ticket_id: ticketId,
+          cost: chosenCost / linkedItems.length,
+          item_id: links.itemtype,
+          gp: gp
         };
 
         await apiLocalStatus('cost', {
           method: 'POST',
-          body: JSON.stringify(editingStatus)
+          body: JSON.stringify(editingStatus)   
         });
       }
       rawComment = `<b>[Clôture ticket] : terminer</b>`;
 
     } else if (currentStatusId === STATUS_CLOSED && targetStatusId !== STATUS_CLOSED) {
-      console.log("Réouverture du ticket ID:", ticketId);
-      // Récupération sécurisée du commentaire de l'objet
       const chosenComment = actionReason.comment.trim() || "Aucune raison spécifiée";
       rawComment = `<b>[Réouverture du ticket] :</b> ${chosenComment}`;
     }
 
-    // --- TRAITEMENT STANDARD DE LA MISE À JOUR ---
     const previousTickets = [...tickets];
     setTickets(prev => prev.map(t => t.id === ticketId ? { ...t, status: targetStatusId } : t));
 
@@ -317,6 +309,7 @@ const reouverturAnnuler = async (e) => {
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
     if (!newTicket.name.trim()) return;
+    setActionLoading(true);
     try {
       const payload = {
         name: newTicket.name.trim(),
@@ -331,6 +324,8 @@ const reouverturAnnuler = async (e) => {
       await loadAllTicketsData();
     } catch (err) {
       setMessage({ text: `Erreur d'injection : ${err.message}`, type: 'error' });
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -408,7 +403,7 @@ const reouverturAnnuler = async (e) => {
         })}
       </div>
 
-      {/* POPUP DE RECOUVREMENT ADAPTATIF (CLÔTURE OU RÉOUVERTURE) */}
+      {/* POPUP DE RECOUVREMENT ADAPTATIF */}
       {isActionModalOpen && (
         <div style={styles.modalOverlay}>
           <div style={{ ...styles.modalContent, maxWidth: '450px' }}>
@@ -423,7 +418,7 @@ const reouverturAnnuler = async (e) => {
               <div style={styles.modalBody}>
                 <p style={{ fontSize: '13px', color: '#cbd5e1', marginBottom: '14px' }}>{actionModalConfig.label}</p>
 
-                {/* CHAMP UNIQUE POUR LA CLÔTURE (TARGET = CLOSED) */}
+                {/* CHAMP UNIQUE POUR LA CLÔTURE */}
                 {actionModalConfig.targetStatusId === STATUS_CLOSED && (
                   <div style={styles.formGroup}>
                     <label style={styles.formLabel}>SuperCost de résolution :</label>
@@ -438,40 +433,24 @@ const reouverturAnnuler = async (e) => {
                   </div>
                 )}
 
-                {/* CHAMP UNIQUE POUR LA RÉOUVERTURE (CURRENT = CLOSED) */}
+                {/* CHAMP UNIQUE POUR LA RÉOUVERTURE AVEC LE POURCENTAGE */}
                 {actionModalConfig.currentStatusId === STATUS_CLOSED && (
                   <div style={styles.formGroup}>
-                    <label style={styles.formLabel}>Justification / Commentaire :</label>
-                    {/* <textarea 
-                      value={actionReason.comment} 
-                      onChange={(e) => setActionReason(prev => ({ ...prev, comment: e.target.value }))} 
-                      style={styles.formTextarea}
-                      rows="4"
-                      placeholder="Indiquez la raison du retour en arrière..."
+                    <label style={styles.formLabel}>Valeur de reprise (Pourcentage %) :</label>
+                    <input 
+                      type="number" 
+                      placeholder="Ex: 50" 
+                      value={VAleur} 
+                      onChange={(e) => setVAleur(e.target.value)} 
+                      style={styles.formInput}
                       required
                       autoFocus
-                    /> */}
-                 <button onClick={(e) => {
-    Annuler(e, news.idTicket);
-    setIsActionModalOpen(false);
-  }}
->
-  Annuler
-</button>
-
-<input type="number" value={VAleur} onChange={(e) => setVAleur(e.target.value)} />
-
-<button onClick={(e) => {
-    reouverturAnnuler(e); 
-    setIsActionModalOpen(false);
-  }} 
->
-  Réouverture
-</button>
+                    />
                   </div>
                 )}
               </div>
 
+              {/* PIED DE MODALE CORRIGÉ ET HARMONISÉ */}
               <div style={styles.modalFooter}>
                 <button 
                   type="button" 
@@ -482,11 +461,39 @@ const reouverturAnnuler = async (e) => {
                     setActionReason({ cost: '', category: '', comment: '' });
                   }}
                 >
-                  Annuler
+                  Fermer
                 </button>
-                <button type="submit" style={styles.btnSubmitActive}>
-                  Valider
-                </button>
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  {actionModalConfig.targetStatusId === STATUS_CLOSED ? (
+                    <button type="submit" style={styles.btnSubmitActive}>
+                      Valider la Clôture
+                    </button>
+                  ) : (
+                    <>
+                      <button 
+                        type="button"
+                        style={styles.btnCancelAction}
+                        onClick={(e) => {
+                          Annuler(e, news.idTicket);
+                          setIsActionModalOpen(false);
+                        }}
+                      >
+                        Annulation
+                      </button>
+                      <button 
+                        type="button"
+                        style={styles.btnSubmitActive}
+                        onClick={(e) => {
+                          reouverturAnnuler(e); 
+                          setIsActionModalOpen(false);
+                        }}
+                      >
+                        Réouverture
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </form>
           </div>
@@ -539,7 +546,6 @@ const reouverturAnnuler = async (e) => {
         <div style={styles.modalOverlay} onClick={() => setIsCreateModalOpen(false)}>
           <div style={{ ...styles.modalContent, maxWidth: '550px' }} onClick={(e) => e.stopPropagation()}>
             <form onSubmit={handleCreateSubmit}>
-              {/* Contenu inchangé de création */}
               <div style={styles.modalHeader}>
                 <div>
                   <span style={styles.cardMetaTag}>Nouveau Ticket d'Assistance</span>

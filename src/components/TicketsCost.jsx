@@ -1,30 +1,99 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { fetchGlpiTickets } from '../services/CrudService';
 import { apiGlpi } from '../api/apiGlpi';
 import { apiLocalStatus } from '../api/configApi';
-
+import { fetchGlpiItems } from '../services/CrudService';
 const TicketsCost = () => {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', type: '' });
-  
-  const [hardwareSummary, setHardwareSummary] = useState([]);
+  const [items,setItems]=useState([]);  
+  const [tickets, setTickets] = useState([]);
+  const [allLinks, setAllLinks] = useState([]);
+  const [allCostsGlpi, setAllCostsGlpi] = useState([]);
+  const [allSuperCostsLocal, setAllSuperCostsLocal] = useState([]);
 
-  const calculateHardwareCosts = useCallback((links, glpiCosts, localCosts) => {
-    const summary = {
-      Computer: { count: 0, glpiCost: 0, superCost: 0, reouverture: 0 },
-      Phone: { count: 0, glpiCost: 0, superCost: 0, reouverture: 0 },
-      Monitor: { count: 0, glpiCost: 0, superCost: 0, reouverture: 0 }
-    };
+  const [hardwareSummary, setHardwareSummary] = useState([]);
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalData, setModalData] = useState(null);
+
+  useEffect(() => {
+    loadAllCostData();
+  }, []);
+
+  const loadAllCostData = async () => {
+    setLoading(true);
+    try {
+      const [ticketsRes, linksRes, costsGlpiRes, costsLocalRes, detailsLocalRes] = await Promise.all([
+        fetchGlpiTickets(),
+        apiGlpi('Item_Ticket'),
+        apiGlpi('TicketCost'),
+        apiLocalStatus('cost'),       
+        apiLocalStatus('costDetails') 
+      ]);
+      const typesToFetch = ['Computer', 'Monitor', 'Phone']; 
+            const itemsPromises = typesToFetch.map(async (type) => {
+              try {
+                const res = await fetchGlpiItems(type);
+                const cleanItems = Array.isArray(res) ? res : [];
+                return cleanItems.map(item => ({ ...item, itemtype: type }));
+              } catch(er) {
+                console.log(er);
+                return [] ; 
+              }
+            });
+      
+            const allItemsResults = await Promise.all(itemsPromises);
+      const flattenedItems = allItemsResults.flat();
+      const cleanTickets = Array.isArray(ticketsRes) ? ticketsRes : [];
+      const cleanLinks = Array.isArray(linksRes) ? linksRes : [];
+      const cleanCostsGlpi = Array.isArray(costsGlpiRes) ? costsGlpiRes : [];
+      const cleanCostsLocal = Array.isArray(costsLocalRes) ? costsLocalRes : [];
+      const cleanDetailsLocal = Array.isArray(detailsLocalRes) ? detailsLocalRes : [];
+      setItems(flattenedItems);
+      setTickets(cleanTickets);
+      setAllLinks(cleanLinks);
+      setAllCostsGlpi(cleanCostsGlpi);
+      setAllSuperCostsLocal(cleanCostsLocal);
+
+      calculateHardwareCosts(cleanLinks, cleanCostsGlpi, cleanCostsLocal, cleanDetailsLocal, cleanTickets, flattenedItems);
+
+    } catch (err) {
+      console.error("Erreur lors du calcul de la synthèse financière :", err);
+      setMessage({ text: "Impossible de charger la synthèse analytique.", type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const calculateHardwareCosts = (links, glpiCosts, localTotals, localDetails, rawTickets, glpiItems) => {
+    const summary = {};
 
     links.forEach(link => {
       const type = link.itemtype; 
       const ticketId = parseInt(link.tickets_id, 10);
-
+      const itemId = parseInt(link.items_id, 10); 
+      
+      const matchedHardware = glpiItems.find(
+        i => i.itemtype === type && parseInt(i.id, 10) === itemId
+      );
+      // console.log(glpiItems);
+      const correspondingTicket = rawTickets.find(t => parseInt(t.id, 10) === ticketId);
+      const itemName = matchedHardware?.name || correspondingTicket?.item_name || `${type} #${itemId}`;
+    
       if (!summary[type]) {
-        summary[type] = { count: 0, glpiCost: 0, superCost: 0, reouverture: 0 };
+        summary[type] = { count: 0, glpiCost: 0, superCost: 0, reouverture: 0, details: {} };
       }
 
-      summary[type].count += 1;
+      if (!summary[type].details[itemId]) {
+        summary[type].details[itemId] = { 
+          id: itemId, 
+          name: itemName,
+          glpiCost: 0, 
+          superCost: 0, 
+          reouverture: 0 
+        };
+      }
 
       const costsForTicket = glpiCosts.filter(c => parseInt(c.tickets_id, 10) === ticketId);
       let ticketGlpiTotal = costsForTicket.reduce((sum, item) => {
@@ -36,72 +105,74 @@ const TicketsCost = () => {
       }, 0);
 
       const totalItemsOnTicket = links.filter(l => parseInt(l.tickets_id, 10) === ticketId).length;
-      summary[type].glpiCost += totalItemsOnTicket > 0 ? (ticketGlpiTotal / totalItemsOnTicket) : ticketGlpiTotal;
+      const distributedGlpiCost = totalItemsOnTicket > 0 ? (ticketGlpiTotal / totalItemsOnTicket) : ticketGlpiTotal;
+
+      summary[type].glpiCost += distributedGlpiCost;
+      summary[type].details[itemId].glpiCost += distributedGlpiCost;
     });
 
-    localCosts.forEach(entry => {
-      const type = entry.item_id; 
-      const costValue = parseFloat(entry.cost) || 0;
-      const reouvertureValue = parseFloat(entry.prix) || 0; 
+    Object.keys(summary).forEach(type => {
+      summary[type].count = Object.keys(summary[type].details).length;
+    });
 
+    localTotals.forEach(entry => {
+      const type = entry.item_id; 
       if (summary[type]) {
-        summary[type].superCost += costValue;
-        summary[type].reouverture += reouvertureValue; 
-      } else {
-        summary[type] = { count: 0, glpiCost: 0, superCost: costValue, reouverture: reouvertureValue };
+        summary[type].superCost = parseFloat(entry.cost) || 0;
+        summary[type].reouverture = parseFloat(entry.prix) || 0;
       }
     });
 
-    // 3. Formatage final des lignes du tableau
+    localDetails.forEach(detail => {
+      const ticketId = parseInt(detail.id_ticket, 10);
+      const costValue = parseFloat(detail.cost) || 0;
+      const reouvertureValue = parseFloat(detail.prix) || 0;
+
+      const linksForTicket = links.filter(l => parseInt(l.tickets_id, 10) === ticketId);
+      const totalEquipements = linksForTicket.length;
+
+      if (totalEquipements > 0) {
+        const shareCost = costValue / totalEquipements;
+        const shareReouverture = reouvertureValue / totalEquipements;
+
+        linksForTicket.forEach(link => {
+          const type = link.itemtype;
+          const itemId = parseInt(link.items_id, 10);
+
+          if (summary[type] && summary[type].details[itemId]) {
+            summary[type].details[itemId].superCost += shareCost;
+            summary[type].details[itemId].reouverture += shareReouverture;
+          }
+        });
+      }
+    });
+
     const formattedData = Object.keys(summary).map(key => ({
       hardwareType: key,
       count: summary[key].count,
       glpiCost: summary[key].glpiCost,
       superCost: summary[key].superCost,
       reouverture: summary[key].reouverture, 
-      totalCost: summary[key].glpiCost + summary[key].superCost + summary[key].reouverture
+      totalCost: summary[key].glpiCost + summary[key].superCost + summary[key].reouverture,
+      itemsList: Object.values(summary[key].details)
     }));
-
     setHardwareSummary(formattedData);
-  }, []);
+  };
 
-  const loadAllCostData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [, linksRes, costsGlpiRes, costsLocalRes] = await Promise.all([
-        fetchGlpiTickets(),
-        apiGlpi('Item_Ticket'),
-        apiGlpi('TicketCost'),
-        apiLocalStatus('cost')
-      ]);
+  const openDetailsModal = (item) => {
+    setModalData(item);
+    setIsModalOpen(true);
+  };
 
-      const cleanLinks = Array.isArray(linksRes) ? linksRes : [];
-      const cleanCostsGlpi = Array.isArray(costsGlpiRes) ? costsGlpiRes : [];
-      const cleanCostsLocal = Array.isArray(costsLocalRes) ? costsLocalRes : [];
-
-      calculateHardwareCosts(cleanLinks, cleanCostsGlpi, cleanCostsLocal);
-
-    } catch (err) {
-      console.error("Erreur lors du calcul de la synthèse financière :", err);
-      setMessage({ text: "Impossible de charger la synthèse analytique du parc.", type: 'error' });
-    } finally {
-      setLoading(false);
-    }
-  }, [calculateHardwareCosts]);
-
-  useEffect(() => {
-    let isMounted = true;
-    if (isMounted) {
-      loadAllCostData();
-    }
-    return () => { isMounted = false; };
-  }, [loadAllCostData]);
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setModalData(null);
+  };
 
   const grandTotalReouverture = hardwareSummary.reduce((sum, item) => sum + item.reouverture, 0);
   const grandTotalGlpi = hardwareSummary.reduce((sum, item) => sum + item.glpiCost, 0);
   const grandTotalSuper = hardwareSummary.reduce((sum, item) => sum + item.superCost, 0);
   const grandTotalAll = hardwareSummary.reduce((sum, item) => sum + item.totalCost, 0);
-
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
@@ -112,7 +183,6 @@ const TicketsCost = () => {
 
   return (
     <div style={styles.page}>
-      
       <div style={styles.topHeader}>
         <div>
           <h2 style={styles.mainTitle}>Comptabilité Analytique par Parc Matériel</h2>
@@ -131,7 +201,7 @@ const TicketsCost = () => {
         <table style={styles.table}>
           <thead>
             <tr style={styles.thRow}>
-              <th style={styles.th}>Type d'infrastructure</th>
+              <th style={styles.th}>Type d'infrastructure (Cliquer pour voir les équipements)</th>
               <th style={{ ...styles.th, textAlign: 'right', color: '#64748b' }}>Réouverture (Local)</th>
               <th style={{ ...styles.th, textAlign: 'right' }}>Coût GLPI (Native)</th>
               <th style={{ ...styles.th, textAlign: 'right' }}>Super Coût (Clôture)</th>
@@ -140,22 +210,22 @@ const TicketsCost = () => {
           </thead>
           <tbody>
             {hardwareSummary.map((item, idx) => (
-              <tr key={idx} style={styles.tr}>
+              <tr key={idx} onClick={() => openDetailsModal(item)} style={styles.trInteractive}>
                 <td style={styles.tdHardware}>
-                  {item.hardwareType}
+              
+                  {item.hardwareType} ({item.count})
                 </td>
-                {/* Formatage propre en MGA de ta valeur de réouverture */}
-                <td style={{ ...styles.tdCost, color: '#5A6178', textAlign: 'right' }}>
-                  {item.reouverture.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
+                <td style={{ ...styles.tdCost, color: '#e2e8f0' }}>
+                  {item.reouverture.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} 
                 </td>
-                <td style={{ ...styles.tdCost, color: '#1A1D2E' }}>
-                  {item.glpiCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
+                <td style={{ ...styles.tdCost, color: '#f8fafc' }}>
+                  {item.glpiCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} 
                 </td>
-                <td style={{ ...styles.tdCost, color: '#4338CA' }}>
-                  {item.superCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
+                <td style={{ ...styles.tdCost, color: '#38bdf8' }}>
+                  {item.superCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} 
                 </td>
-                <td style={{ ...styles.tdCost, fontWeight: '700', color: '#059669', backgroundColor: 'rgba(5, 150, 105, 0.04)' }}>
-                  {item.totalCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
+                <td style={{ ...styles.tdCost, fontWeight: '700', color: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.02)' }}>
+                  {item.totalCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} 
                 </td>
               </tr>
             ))}
@@ -163,25 +233,65 @@ const TicketsCost = () => {
             {/* LIGNE DE TOTAL GLOBAL */}
             <tr style={styles.totalRow}>
               <td style={styles.tdTotalLabel}>TOTAL PARC INFORMATIQUE</td>
-              <td style={{ ...styles.tdTotalValue, color: '#5A6178' }}>
-                {grandTotalReouverture.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
+              <td style={{ ...styles.tdTotalValue, color: '#cbd5e1' }}>
+                {grandTotalReouverture.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} 
               </td>
               <td style={styles.tdTotalValue}>
-                {grandTotalGlpi.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
+                {grandTotalGlpi.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} 
               </td>
-              <td style={{ ...styles.tdTotalValue, color: '#4338CA' }}>
-                {grandTotalSuper.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
+              <td style={{ ...styles.tdTotalValue, color: '#38bdf8' }}>
+                {grandTotalSuper.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} 
               </td>
-              <td style={{ ...styles.tdTotalValue, color: '#FFFFFF', backgroundColor: '#059669', textAlign: 'right' }}>
-                {grandTotalAll.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
+              <td style={{ ...styles.tdTotalValue, color: '#121212', backgroundColor: '#10b981', textAlign: 'right' }}>
+                {grandTotalAll.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} 
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+
+     
+      {isModalOpen && modalData && (
+        <div style={styles.modalOverlay} onClick={closeModal}>
+          <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div style={styles.modalHeader}>
+              <h3 style={styles.modalTitle}>Détails Équipements — {modalData.hardwareType}</h3>
+              <button style={styles.closeModalBtn} onClick={closeModal}>&times;</button>
+            </div>
+            
+            <div style={styles.modalBody}>
+              <table style={styles.nestedTable}>
+                <thead>
+                  <tr style={styles.nestedThRow}>
+                    <th style={styles.nestedTh}>Nom de l'Équipement</th>
+                    <th style={styles.nestedThRight}>Réouverture</th>
+                    <th style={styles.nestedThRight}>Coût GLPI</th>
+                    <th style={styles.nestedThRight}>Super Coût</th>
+                    <th style={styles.nestedThRight}>Total Machine</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {modalData.itemsList.map((subItem, sIdx) => (
+                    <tr key={sIdx} style={styles.nestedTr}>
+                      <td style={styles.nestedTdName}>🖥️ {subItem.name}</td>
+                      <td style={styles.nestedTdValue}>{subItem.reouverture.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA</td>
+                      <td style={styles.nestedTdValue}>{subItem.glpiCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA</td>
+                      <td style={styles.nestedTdValue}>{subItem.superCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA</td>
+                      <td style={{ ...styles.nestedTdValue, color: '#00d2ff', fontWeight: '600' }}>
+                        {(subItem.glpiCost + subItem.superCost + subItem.reouverture).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
 
 const styles = {
   loadingContainer: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#F8F9FC' },

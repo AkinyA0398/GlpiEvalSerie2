@@ -1,0 +1,4 @@
+ETU003244
+15h09
+find . -type f -mmin -30 -exec ls -lh {} \; 
+

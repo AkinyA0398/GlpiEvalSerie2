@@ -592,3 +592,29 @@ export const getGlpiUsersByGroup = async () => {
     throw error;
   }
 };
+export const fetchGlpiTicketByExternalId = async (externalId) => {
+  if (!externalId) return null;
+
+  try {
+    const FIELD_EXTERNAL_ID = 87;
+
+    const url = `search/Ticket?forcedisplay[0]=1&forcedisplay[1]=2&forcedisplay[2]=12&criteria[0][field]=${FIELD_EXTERNAL_ID}&criteria[0][searchtype]=equals&criteria[0][value]=${encodeURIComponent(externalId)}`;
+
+    const response = await apiGlpi(url, { method: 'GET' });
+
+    if (response && response.data && response.data.length > 0) {
+      const glpiTicket = response.data[0];
+
+      return {
+        id: parseInt(glpiTicket[2], 10),
+        name: glpiTicket[1],
+        status: parseInt(glpiTicket[12], 10)
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.error(`Erreur lors de la récupération du ticket externe ${externalId} sur GLPI:`, error);
+    throw error;
+  }
+};

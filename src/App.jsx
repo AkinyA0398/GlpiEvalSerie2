@@ -2,6 +2,7 @@
 import { createBrowserRouter, RouterProvider, Navigate, useNavigate } from 'react-router-dom';
 import TestUsers from './components/TestUsers';
 import AddUser from './components/addUser';
+
 import TableauSquelette from './squelette/Tableau';
 import Popup from './squelette/Popup';
 import LoginBack from './components/LoginBack';
@@ -11,7 +12,7 @@ import GlpiItemList from './components/GlpiItemList';
 import CreateTicket from './components/CreateTicket';
 import GlpiDashboard from './components/GlpiDashboard';
 import TicketsList from './components/TicketsList';
-
+import ResumeTicket from './components/ResumeTicket';
 // Importation de tes deux nouveaux layouts séparés
 import BackOfficeLayout from './components/BackOfficeLayout';
 import FrontOfficeLayout from './components/FrontOfficeLayout';
@@ -20,7 +21,7 @@ import ResetData from './components/ResetData';
 import TicketsListKanban from './components/TicketsListKanban';
 import StatusConfigPage from './components/StatusConfigPage';
 import TicketsCost from './components/TicketsCost';
-import ResumeTicket from './components/ResumeTicket';
+import CsvMouvement from './components/CsvMouvement';
 
 const Login = () => {
   const navigate = useNavigate(); 
@@ -62,6 +63,9 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <Home />
+  }, {
+    path: '/CsvMvt',
+    element: <CsvMouvement />
   },{
     path: '/cost',
     element: <TicketsCost />
@@ -144,21 +148,22 @@ const router = createBrowserRouter([
     )
   },
   {
-    path: '/resumeticket', 
-    element: (
-      <ProtectedAdmin>
-        <BackOfficeLayout>
-          <ResumeTicket />
-        </BackOfficeLayout>
-      </ProtectedAdmin>
-    )
-  },
-  {
     path: '/admin/reset', 
     element: (
       <ProtectedAdmin>
         <BackOfficeLayout>
           <ResetData />
+        </BackOfficeLayout>
+      </ProtectedAdmin>
+    )
+  },
+
+  {
+    path: '/resumeticket',
+    element: (
+      <ProtectedAdmin>
+        <BackOfficeLayout>
+          <ResumeTicket />
         </BackOfficeLayout>
       </ProtectedAdmin>
     )
