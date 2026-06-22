@@ -12,7 +12,7 @@ import GlpiItemList from './components/GlpiItemList';
 import CreateTicket from './components/CreateTicket';
 import GlpiDashboard from './components/GlpiDashboard';
 import TicketsList from './components/TicketsList';
-import ResumeTicket from './components/ResumeTicket';
+// import ResumeTicket from './components/ResumeTicket';
 // Importation de tes deux nouveaux layouts séparés
 import BackOfficeLayout from './components/BackOfficeLayout';
 import FrontOfficeLayout from './components/FrontOfficeLayout';
@@ -158,16 +158,16 @@ const router = createBrowserRouter([
     )
   },
 
-  {
-    path: '/resumeticket',
-    element: (
-      <ProtectedAdmin>
-        <BackOfficeLayout>
-          <ResumeTicket />
-        </BackOfficeLayout>
-      </ProtectedAdmin>
-    )
-  },
+  // {
+  //   path: '/resumeticket',
+  //   element: (
+  //     <ProtectedAdmin>
+  //       <BackOfficeLayout>
+  //         <ResumeTicket />
+  //       </BackOfficeLayout>
+  //     </ProtectedAdmin>
+  //   )
+  // },
 
   // --- ANCIENNES ROUTES DE TEST ---
   {

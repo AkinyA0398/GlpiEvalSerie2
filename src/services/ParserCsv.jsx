@@ -45,7 +45,7 @@ const splitCsvLine = (line) => {
 /**
  * Hook de parsing pour les fichiers du parc informatique
  */
-export function useCsvParser({ hasHeader = true }) {
+export function useCsvParser({ separator = ',', hasHeader = true }) {
   const [data, setData] = useState({
     devicesByType: {}, 
     statuses: [],
@@ -353,7 +353,7 @@ export function useSuperCostCsvParser({ separator = ',', hasHeader = true } = {}
 
           const fields = splitCsvLine(line, separator);
 
-          const [numTicket, mvt, valeur] = fields;
+          const [numTicket, mvt, valeur, modeCsv] = fields;
 
           const cleanValeur = parseFloat(valeur) || 0;
           const ticketId = parseInt(numTicket, 10);
@@ -362,7 +362,8 @@ export function useSuperCostCsvParser({ separator = ',', hasHeader = true } = {}
             parsedCosts.push({
               tickets_id: ticketId,
               status: mvt ? mvt.trim() : '', 
-              valeur: cleanValeur              
+              valeur: cleanValeur,
+              mode: modeCsv ? String(modeCsv).trim() : null
             });
           }
         }

@@ -1,5 +1,6 @@
-ticket_id,mvt,valeur
-1,open,16.5
-2,open,5.5
-2,closed,20
-2,cancel,0
+ticket_id,mvt,valeur,mode
+1,closed,0,
+1,open,10,3
+2,open,7.5,4
+2,closed,0,
+2,open,10,3

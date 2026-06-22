@@ -1,0 +1,17 @@
+misy mode de calcul de pourcentage de reouverture, 
+mode 1 : dernier cout est à prendre 
+mode 2 : premier cout est à prendre 
+mode 3 : moyenne cout est à prendre 
+mode 4 : sum cout rehetra est à prendre 
+
+interface liste (mode 1,2,3,4) (kanban boite dialogue reouverture) 
+import avec nom mode : 1,2,3,4 reouverture (open) (csvmouvement.jsx)
+
+supercost est le seul à etre toucher
+supercost peut etre 0 quand on le deplace dans terminer (kanban) 
+
+fichier à toucher :
+- app.py
+- csvmouvement.jsx
+- TicketListKanban.jsx
+- Backoffice.jsx

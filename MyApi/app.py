@@ -196,6 +196,69 @@ def getLast():
         })
     return jsonify(cost_list)
 
+@app.route("/costFirst", methods=["GET"])
+def getFirst():
+    item = request.args.get("itemtype")
+    id_ticket = request.args.get("id_ticket")
+    
+    conn = sqlite3.connect("test.db")
+    cursor = conn.cursor()
+    cursor.execute('SELECT cost FROM costItem WHERE item_id=? and id_ticket=? ORDER BY gp ASC', (item, id_ticket))
+    rows = cursor.fetchall()
+    conn.close() 
+
+    cost_list = []
+    for row in rows:
+        cost_list.append({
+            "cost": row[0]
+        })
+    return jsonify(cost_list)
+
+@app.route("/costMoyenne", methods=["GET"])
+def getMoyenne():
+    item = request.args.get("itemtype")
+    id_ticket = request.args.get("id_ticket")
+
+    conn = sqlite3.connect("test.db")
+    cursor = conn.cursor()
+
+    # Moyenne de tous les cost par (item_id, id_ticket)
+    cursor.execute(
+        """
+        SELECT COALESCE(AVG(cost), 0)
+        FROM costItem
+        WHERE item_id=? AND id_ticket=?
+        """,
+        (item, id_ticket)
+    )
+    row = cursor.fetchone()
+    conn.close()
+
+    return jsonify([{"cost": row[0] if row else 0}])
+
+@app.route("/costSum", methods=["GET"])
+def getSum():
+    item = request.args.get("itemtype")
+    id_ticket = request.args.get("id_ticket")
+
+    conn = sqlite3.connect("test.db")
+    cursor = conn.cursor()
+
+    # Somme de tous les cost par (item_id, id_ticket)
+    cursor.execute(
+        """
+        SELECT COALESCE(SUM(cost), 0)
+        FROM costItem
+        WHERE item_id=? AND id_ticket=?
+        """,
+        (item, id_ticket)
+    )
+    row = cursor.fetchone()
+    conn.close()
+
+    return jsonify([{"cost": row[0] if row else 0}])
+
+
 @app.route("/cost", methods=["GET"])
 def get_cost():
     conn = sqlite3.connect("test.db")

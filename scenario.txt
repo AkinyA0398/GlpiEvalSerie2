@@ -1,0 +1,8 @@
+scenario :
+terminer ticket 1 50
+terminer ticket 2 150
+ouvrir ticket 1 5% mode 1
+terminer ticket 1 46
+ouvrir ticket 1 10% mode 4
+ouvrir ticket 2 10% mode 3
+terminer ticket 2 300

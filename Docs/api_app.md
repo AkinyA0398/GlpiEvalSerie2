@@ -63,6 +63,7 @@ Le script initialise automatiquement la base de données SQLite `test.db` avec d
 ## 4. Exécution
 Pour lancer le serveur en mode développement :
 ```bash
+source venv/bin/activate
 python3 app.py
 ```
 Le serveur tourne par défaut sur `http://localhost:5000`.

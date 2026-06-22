@@ -1,22 +1,25 @@
 import React, { useState } from 'react';
 import { useSuperCostCsvParser } from '../services/ParserCsv'; 
-import { fetchGlpiTickets, fetchGlpiTicketByExternalId } from '../services/CrudService'; 
+import { fetchGlpiTicketByExternalId } from '../services/CrudService'; 
 import { apiLocalStatus } from '../api/configApi'; 
 import { apiGlpi } from '../api/apiGlpi';
+
 const CsvMouvement = () => {
   const { costData, parseCostFile } = useSuperCostCsvParser({ separator: ',' });
-  const [allLinks, setAllLinks] = useState([]);
+
   const [importing, setImporting] = useState(false);
-  const [imports,setImport]=useState({id:0,valeur:0,mvt:''});  
+  const [imports,setImport]=useState({id:0,valeur:0,mvt:''}); 
+  const [reouvertureMode, setReouvertureMode] = useState('1');
+
   const handleCostsUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
       parseCostFile(file);
     }
   };
- const traiter = async (id, status, valeur, currentLinks = null) => {
+ const traiter = async (id, status, valeur, modeCsv = null, currentLinks = null) => {
   try {
-    let linksRes; 
+    let linksRes;
 
     if (currentLinks === null) {
       linksRes = await apiGlpi('Item_Ticket');
@@ -27,18 +30,22 @@ const CsvMouvement = () => {
     const safeLinks = Array.isArray(linksRes) ? linksRes : [];
 
     const glpiTicketMapped = await fetchGlpiTicketByExternalId(id);
-    console.log(glpiTicketMapped);  
-    
+
     if (!glpiTicketMapped || !glpiTicketMapped.id) {
       console.warn(`Aucun ticket GLPI trouvé pour l'ID externe : ${id}`);
       return;
     }
 
     const realGlpiId = glpiTicketMapped.id;
-    
+
     const linkedItems = safeLinks.filter(item => parseInt(item.tickets_id, 10) === realGlpiId);
     const gp = Date.now();
     const currentStatusClean = String(status).toLowerCase().trim();
+
+    // Toujours récupérer les coûts passés côté local pour calculer la base de réouverture
+    const supercost = Number(valeur) || 0;
+
+
 
     if (currentStatusClean === "cancel") {
       await apiGlpi(`Ticket/${realGlpiId}`, {
@@ -49,10 +56,11 @@ const CsvMouvement = () => {
       await apiLocalStatus(`cost/${realGlpiId}`, {
         method: 'DELETE'
       });
-      
-      return; 
+
+      return;
     }
 
+    // Mise à jour statut GLPI
     if ((currentStatusClean === "closed" || currentStatusClean === "close") && linkedItems.length > 0) {
       await apiGlpi(`Ticket/${realGlpiId}`, {
         method: 'PUT',
@@ -66,35 +74,69 @@ const CsvMouvement = () => {
     }
 
     for (const links of linkedItems) {
-      
-      if ((currentStatusClean === "closed" || currentStatusClean === "close")) {
-        const numericCost = Number(valeur) || 0;
-        
-        let editingStatus = { 
+      // CLÔTURE : supercost = montant à injecter, réparti sur les items
+      if (currentStatusClean === "closed" || currentStatusClean === "close") {
+        const numericCost = supercost; // peut être 0 => on insère quand même
+
+        const editingStatus = {
           ticket_id: realGlpiId,
           cost: linkedItems.length > 0 ? (numericCost / linkedItems.length) : 0,
           item_id: links.itemtype,
-          gp: gp
+          gp
         };
 
         await apiLocalStatus('cost', {
           method: 'POST',
-          body: JSON.stringify(editingStatus)   
+          body: JSON.stringify(editingStatus)
         });
       }
 
-      if (currentStatusClean === "open") {
-        const url = `costLast?itemtype=${links.itemtype}&id_ticket=${realGlpiId}`;
-        const localStatuses = await apiLocalStatus(url);
-        
-        const lastCost = (localStatuses && localStatuses.length > 0) ? localStatuses[0].cost : 0;
-        const valiny = (lastCost * Number(valeur || 0)) / 100;
-        
-        let editingStatus = { 
+      // RÉOUVERTURE (mode 1-4) : baseCost(mode) * supercost / 100
+      if (currentStatusClean === "open" && linkedItems.length > 0) {
+        const costsAllDescRes = await apiLocalStatus(
+          `costLast?itemtype=${links.itemtype}&id_ticket=${realGlpiId}`
+        );
+
+        const costsAllDesc = Array.isArray(costsAllDescRes) ? costsAllDescRes : [];
+        const costsAllAscRes = await apiLocalStatus(
+          `costFirst?itemtype=${links.itemtype}&id_ticket=${realGlpiId}`
+        );
+        const costsAllAsc = Array.isArray(costsAllAscRes) ? costsAllAscRes : [];
+
+        const nums = costsAllDesc.map(c => Number(c.cost) || 0);
+
+        let baseCost = 0;
+        const modeUsed = String(modeCsv || reouvertureMode).replace(/\D/g, '');
+        switch (modeUsed) {
+          case '2': {
+            // premier coût (gp min)
+            baseCost = costsAllAsc.length > 0 ? Number(costsAllAsc[0].cost) || 0 : 0;
+            break;
+          }
+          case '3': {
+            // moyenne
+            baseCost = nums.length > 0 ? nums.reduce((sum, x) => sum + x, 0) / nums.length : 0;
+            break;
+          }
+          case '4': {
+            // somme
+            baseCost = nums.reduce((sum, x) => sum + x, 0);
+            break;
+          }
+          case '1':
+          default: {
+            // dernier coût (gp max)
+            baseCost = costsAllDesc.length > 0 ? Number(costsAllDesc[0].cost) || 0 : 0;
+          }
+        }
+
+        const valiny = (baseCost * supercost) / 100; // supercost=0 => valiny=0
+
+        const editingStatus = {
           item_id: links.itemtype,
-          cost: valiny || 0,
+          cost: Number(valiny) || 0,
           ticket_id: realGlpiId,
-          gp: gp
+          gp
         };
 
         await apiLocalStatus('costPrix', {
@@ -103,14 +145,14 @@ const CsvMouvement = () => {
         });
       }
     }
-  
+
   } catch (error) {
     console.error("Erreur dans traiter:", error);
   }
 }
   const handleImportMain = async()=>{
     try{
-           await traiter(imports.id,imports.mvt,imports.valeur);
+           await traiter(imports.id,imports.mvt,imports.valeur, reouvertureMode);
            setImport({id:0,valeur:0,mvt:''}); 
     }catch(error){
         console.log(error);
@@ -123,7 +165,7 @@ const CsvMouvement = () => {
     try {
       
       for (const data of costData) {
-         await traiter(data.tickets_id,data.status,data.valeur);
+         await traiter(data.tickets_id,data.status,data.valeur, data.mode);
       }
       console.log("Importation et mise à jour des statuts terminées !");
     } catch (error) {
@@ -173,6 +215,21 @@ const CsvMouvement = () => {
           style={styles.input}
         />
       </div>
+
+      <div>
+        <label style={styles.label}>Mode de calcul : </label>
+        <select
+          style={styles.select}
+          value={reouvertureMode}
+          onChange={(e) => setReouvertureMode(e.target.value)}
+        >
+          <option value="1">Mode 1 (dernier coût)</option>
+          <option value="2">Mode 2 (premier coût)</option>
+          <option value="3">Mode 3 (moyenne coût)</option>
+          <option value="4">Mode 4 (somme coût)</option>
+        </select>
+      </div>
+
 
       <button onClick={handleImportMain} style={styles.submitBtn}>
         Lancer l'importation
@@ -263,6 +320,17 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     marginBottom: '32px'
+  },
+  select: { 
+    width: '100%', 
+    padding: '12px', 
+    fontSize: '14px', 
+    backgroundColor: '#f8fafc', 
+    border: '1px solid #334155', 
+    borderRadius: '6px', 
+    color: '#121212', 
+    boxSizing: 'border-box', 
+    outline: 'none' 
   },
 
   btnActive: {

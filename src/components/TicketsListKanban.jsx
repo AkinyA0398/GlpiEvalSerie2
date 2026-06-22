@@ -10,7 +10,7 @@ const TicketsListKanban = () => {
   const [technicians, setTechnicians] = useState([]); 
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [VAleur, setVAleur] = useState(0);
+  const [reouvertureMode, setReouvertureMode] = useState('1');
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
   const [ticketDetail, setTicketDetails] = useState([]);
@@ -72,7 +72,7 @@ const TicketsListKanban = () => {
       const validStatusIds = formattedStatuses.map(s => s.id);
 
       const [ticketsRes, linksRes, costsRes, usersRes] = await Promise.all([
-        fetchGlpiTickets(),
+        fetchGlpiTickets(), 
         apiGlpi('Item_Ticket'),
         apiGlpi('TicketCost'),
         apiGlpi('User') 
@@ -128,10 +128,34 @@ const TicketsListKanban = () => {
         for (let listItem of news.item) {
           const url = `costLast?itemtype=${listItem.item_id}&id_ticket=${news.idTicket}`;
           const localStatuses = await apiLocalStatus(url);
-          
-          const lastCost = (localStatuses && localStatuses.length > 0) ? localStatuses[0].cost : 0;
-          let valiny = (lastCost * Number(VAleur)) / 100;
-          
+
+          const statuses = Array.isArray(localStatuses) ? localStatuses : [];
+
+          const lastCost = statuses.length > 0 ? Number(statuses[0].cost) || 0 : 0; // mode 1
+          const firstCost = statuses.length > 0 ? Number(statuses[statuses.length - 1].cost) || 0 : 0; // mode 2
+          const moyenneCost = statuses.length > 0 ? statuses.reduce((sum, s) => sum + (Number(s.cost) || 0), 0) / statuses.length : 0; // mode 3
+          const sumCost = statuses.length > 0 ? statuses.reduce((sum, s) => sum + (Number(s.cost) || 0), 0) : 0; // mode 4
+
+          let baseCost = 0;
+          switch (reouvertureMode) {
+            case '1':
+              baseCost = lastCost;
+              break;
+            case '2':
+              baseCost = firstCost;
+              break;
+            case '3':
+              baseCost = moyenneCost;
+              break;
+            case '4':
+              baseCost = sumCost;
+              break;
+            default:
+              baseCost = lastCost;
+          }
+
+          let valiny = (baseCost * Number(actionReason.cost)) / 100;
+
           let editingStatus = { 
             item_id: listItem.item_id,
             cost: valiny || 0,
@@ -146,7 +170,6 @@ const TicketsListKanban = () => {
         }
       }
       
-      setVAleur(0);
       const { ticketId, targetStatusId, currentStatusId, draggedTicket, technicianId } = actionModalConfig;
       processTicketUpdate(ticketId, targetStatusId, currentStatusId, draggedTicket, technicianId);
       
@@ -436,12 +459,22 @@ const TicketsListKanban = () => {
                 {/* CHAMP UNIQUE POUR LA RÉOUVERTURE AVEC LE POURCENTAGE */}
                 {actionModalConfig.currentStatusId === STATUS_CLOSED && (
                   <div style={styles.formGroup}>
-                    <label style={styles.formLabel}>Valeur de reprise (Pourcentage %) :</label>
+                    <select
+                      style={styles.select}
+                      value={reouvertureMode}
+                      onChange={(e) => setReouvertureMode(e.target.value)}
+                    >
+                      <option value="1">Mode 1 (Dernier coût)</option>
+                      <option value="2">Mode 2 (Premier coût)</option>
+                      <option value="3">Mode 3 (Moyenne coût)</option>
+                      <option value="4">Mode 4 (Somme coût)</option>
+                    </select>
+                      <label style={styles.formLabel}>SuperCost (Pourcentage %) :</label>
                     <input 
                       type="number" 
                       placeholder="Ex: 50" 
-                      value={VAleur} 
-                      onChange={(e) => setVAleur(e.target.value)} 
+                      value={actionReason.cost} 
+                      onChange={(e) => setActionReason(prev => ({ ...prev, cost: e.target.value }))} 
                       style={styles.formInput}
                       required
                       autoFocus
@@ -592,6 +625,17 @@ const TicketsListKanban = () => {
 };
 
 const styles = {
+  select: { 
+    width: '100%', 
+    padding: '12px', 
+    fontSize: '14px', 
+    backgroundColor: '#f8fafc', 
+    border: '1px solid #334155', 
+    borderRadius: '6px', 
+    color: '#121212', 
+    boxSizing: 'border-box', 
+    outline: 'none' 
+  },
   loadingContainer: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#F8F9FC' },
   loadingText: { color: '#4338CA', fontSize: '14px', fontWeight: '600' },
   page: { backgroundColor: '#F8F9FC', minHeight: '100vh', color: '#1A1D2E', fontFamily: "'Inter', system-ui, sans-serif", padding: '30px' },
