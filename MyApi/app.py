@@ -24,9 +24,18 @@ def init_db():
             cost INT DEFAULT 0,
             prix INT DEFAULT 0,
             id_ticket INT,
-            gp TIMESTAMP
+            gp TIMESTAMP,
+            mode TEXT DEFAULT '1',
+            pourcentage REAL DEFAULT 0
         );
     """)
+    
+    try:
+        cursor.execute("ALTER TABLE costItem ADD COLUMN mode TEXT DEFAULT '1'")
+        cursor.execute("ALTER TABLE costItem ADD COLUMN pourcentage REAL DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass
+
     
     cursor.execute("SELECT COUNT(*) FROM status")
     count = cursor.fetchone()[0]
@@ -103,12 +112,14 @@ def add_cost():
     cost = data.get("cost")
     ticket = data.get("ticket_id")
     gp = data.get("gp")
+    mode = data.get("mode", "1")
+    pourcentage = data.get("pourcentage", 0)
     
     conn = sqlite3.connect("test.db")
     cursor = conn.cursor()
     cursor.execute(
-        'INSERT INTO costItem (item_id, cost, id_ticket, gp) VALUES (?, ?, ?, ?)', 
-        (item_id, cost, ticket, gp)
+        'INSERT INTO costItem (item_id, cost, id_ticket, gp, mode, pourcentage) VALUES (?, ?, ?, ?, ?, ?)', 
+        (item_id, cost, ticket, gp, mode, pourcentage)
     )
     conn.commit()
     conn.close()
@@ -118,16 +129,20 @@ def add_cost():
 @app.route("/costPrix", methods=["POST"])
 def add_Prix():
     data = request.get_json()
+    print(f"[DEBUG costPrix] Received data: {data}")
     item_id = data.get("item_id")
     ticket = data.get("ticket_id")
     cost = data.get("cost")
     gp = data.get("gp")
+    mode = data.get("mode", "1")
+    pourcentage = data.get("pourcentage", 0)
+    print(f"[DEBUG costPrix] Parsed => mode={mode}, pourcentage={pourcentage}, cost={cost}, ticket={ticket}")
     
     conn = sqlite3.connect("test.db")
     cursor = conn.cursor()
     cursor.execute(
-        'INSERT INTO costItem (item_id, prix, id_ticket, gp) VALUES (?, ?, ?, ?)', 
-        (item_id, cost, ticket, gp)
+        'INSERT INTO costItem (item_id, prix, id_ticket, gp, mode, pourcentage) VALUES (?, ?, ?, ?, ?, ?)', 
+        (item_id, cost, ticket, gp, mode, pourcentage)
     )
     conn.commit()
     conn.close()
@@ -312,19 +327,105 @@ def get_Allcost():
     conn = sqlite3.connect("test.db")
     cursor = conn.cursor()
     
-    cursor.execute("SELECT item_id, cost, id_ticket, prix FROM costItem")
+    cursor.execute("SELECT id, item_id, cost, id_ticket, prix, mode, pourcentage, gp FROM costItem")
     rows = cursor.fetchall()
     conn.close()
 
     cost_list = []
     for row in rows:
         cost_list.append({
-            "item_id": row[0],
-            "cost": row[1],
-            "id_ticket": row[2],
-            "prix": row[3]
+            "id": row[0],
+            "item_id": row[1],
+            "cost": row[2],
+            "id_ticket": row[3],
+            "prix": row[4],
+            "mode": row[5],
+            "pourcentage": row[6],
+            "gp": row[7]
         })
     return jsonify(cost_list)
+
+@app.route("/costGroup/<string:gp>", methods=["PUT"])
+def update_costGroup(gp):
+    data = request.get_json()
+    cost = data.get("cost")
+    prix = data.get("prix")
+    mode = data.get("mode")
+    pourcentage = data.get("pourcentage")
+    
+    conn = sqlite3.connect("test.db")
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT COUNT(*) FROM costItem WHERE gp=?", (gp,))
+    count = cursor.fetchone()[0]
+    
+    if count == 0:
+        conn.close()
+        return jsonify({"message": "Not found"}), 404
+        
+    cursor.execute("SELECT cost, prix, mode, pourcentage FROM costItem WHERE gp=? LIMIT 1", (gp,))
+    row = cursor.fetchone()
+    
+    new_cost = (float(cost) / count) if cost is not None else row[0]
+    new_prix = (float(prix) / count) if prix is not None else row[1]
+    new_mode = mode if mode is not None else row[2]
+    new_pourcentage = pourcentage if pourcentage is not None else row[3]
+    
+    cursor.execute(
+        "UPDATE costItem SET cost=?, prix=?, mode=?, pourcentage=? WHERE gp=?",
+        (new_cost, new_prix, new_mode, new_pourcentage, gp)
+    )
+    conn.commit()
+    conn.close()
+    return jsonify({"message": "Updated successfully"}), 200
+
+@app.route("/costGroup/<string:gp>", methods=["DELETE"])
+def delete_costGroup(gp):
+    conn = sqlite3.connect("test.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM costItem WHERE gp=?", (gp,))
+    conn.commit()
+    conn.close()
+    return jsonify({"message": "Deleted successfully"}), 200
+
+@app.route("/costItem/<int:id>", methods=["PUT"])
+def update_costItem(id):
+    data = request.get_json()
+    cost = data.get("cost")
+    prix = data.get("prix")
+    mode = data.get("mode")
+    pourcentage = data.get("pourcentage")
+    
+    conn = sqlite3.connect("test.db")
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT cost, prix, mode, pourcentage FROM costItem WHERE id=?", (id,))
+    row = cursor.fetchone()
+    if not row:
+        conn.close()
+        return jsonify({"message": "Not found"}), 404
+        
+    new_cost = cost if cost is not None else row[0]
+    new_prix = prix if prix is not None else row[1]
+    new_mode = mode if mode is not None else row[2]
+    new_pourcentage = pourcentage if pourcentage is not None else row[3]
+    
+    cursor.execute(
+        "UPDATE costItem SET cost=?, prix=?, mode=?, pourcentage=? WHERE id=?",
+        (new_cost, new_prix, new_mode, new_pourcentage, id)
+    )
+    conn.commit()
+    conn.close()
+    return jsonify({"message": "Updated successfully"}), 200
+
+@app.route("/costItem/<int:id>", methods=["DELETE"])
+def delete_costItem(id):
+    conn = sqlite3.connect("test.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM costItem WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+    return jsonify({"message": "Deleted successfully"}), 200
 @app.route("/costDetails", methods=["GET"])
 def get_cost_details():
     try:

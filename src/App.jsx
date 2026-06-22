@@ -22,6 +22,7 @@ import TicketsListKanban from './components/TicketsListKanban';
 import StatusConfigPage from './components/StatusConfigPage';
 import TicketsCost from './components/TicketsCost';
 import CsvMouvement from './components/CsvMouvement';
+import ListReouverture from './components/ListReouverture';
 
 const Login = () => {
   const navigate = useNavigate(); 
@@ -63,13 +64,7 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <Home />
-  }, {
-    path: '/CsvMvt',
-    element: <CsvMouvement />
-  },{
-    path: '/cost',
-    element: <TicketsCost />
-  },
+  }, 
   {
     path: '/login',
     element: <Login />
@@ -109,6 +104,16 @@ const router = createBrowserRouter([
     )
   },
   {
+    path: '/cost',
+    element: (
+      <ProtectedAdmin>
+        <BackOfficeLayout>
+        <TicketsCost />
+        </BackOfficeLayout>
+      </ProtectedAdmin>
+    )
+  },
+  {
     path: '/statusConfig',
     element: (
       <ProtectedAdmin>
@@ -136,6 +141,15 @@ const router = createBrowserRouter([
         </BackOfficeLayout>
       </ProtectedAdmin>
     )
+  },{
+    path: '/CsvMvt',
+    element: (
+    <ProtectedAdmin>
+        <BackOfficeLayout>
+          <CsvMouvement />
+        </BackOfficeLayout>
+      </ProtectedAdmin>
+      )
   },
   {
     path: '/testCsv', 
@@ -158,16 +172,16 @@ const router = createBrowserRouter([
     )
   },
 
-  // {
-  //   path: '/resumeticket',
-  //   element: (
-  //     <ProtectedAdmin>
-  //       <BackOfficeLayout>
-  //         <ResumeTicket />
-  //       </BackOfficeLayout>
-  //     </ProtectedAdmin>
-  //   )
-  // },
+  {
+    path: '/listreouverture',
+    element: (
+      <ProtectedAdmin>
+        <BackOfficeLayout>
+          <ListReouverture />
+        </BackOfficeLayout>
+      </ProtectedAdmin>
+    )
+  },
 
   // --- ANCIENNES ROUTES DE TEST ---
   {

@@ -2,5 +2,6 @@ ticket_id,mvt,valeur,mode
 1,closed,0,
 1,open,10,3
 2,open,7.5,4
-2,closed,0,
+2,closed,60,
 2,open,10,3
+1,closed,100,

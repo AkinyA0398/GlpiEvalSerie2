@@ -1,8 +1,37 @@
 scenario :
 terminer ticket 1 50
 terminer ticket 2 150
-ouvrir ticket 1 5% mode 1
+ouvrir   ticket 1 5% mode 1
 terminer ticket 1 46
-ouvrir ticket 1 10% mode 4
-ouvrir ticket 2 10% mode 3
+ouvrir   ticket 1 10% mode 4
+ouvrir   ticket 2 10% mode 3
 terminer ticket 2 300
+
+
+
+
+
+
+
+
+scenario 2 : (kanban)
+ticket 1 closed 50
+ticket 2 closed 150
+ticket 1 open   5%   mode 1
+ticket 1 closed 49
+ticket 1 open   10%  mode 4
+ticket 2 open   10%  mode 3
+ticket 2 closed 300
+
+puis import : csv_alea.csv
+
+recap : 7lignes pour supercost et 6lignes pour reouverture
+
+dans Résumé reouverture (listeReouverture) :
+modif ticket 1 supercost 49 => 52
+modif ticket 2 supercost 300 => 600
+modif ticket 2 7.5% mode 4 => 15% mode 3
+
+total dans resume ticket correct : /cost
+computer : cout total brut = 832,675
+monitor : cout total brut = 454,125

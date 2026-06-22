@@ -160,7 +160,9 @@ const TicketsListKanban = () => {
             item_id: listItem.item_id,
             cost: valiny || 0,
             ticket_id: news.idTicket,
-            gp: gp
+            gp: gp,
+            mode: reouvertureMode,
+            pourcentage: Number(actionReason.cost)
           };
           
           await apiLocalStatus('costPrix', {
@@ -469,7 +471,7 @@ const TicketsListKanban = () => {
                       <option value="3">Mode 3 (Moyenne coût)</option>
                       <option value="4">Mode 4 (Somme coût)</option>
                     </select>
-                      <label style={styles.formLabel}>SuperCost (Pourcentage %) :</label>
+                      <label style={styles.formLabel}>Pourcentage de réouverture (%) :</label>
                     <input 
                       type="number" 
                       placeholder="Ex: 50" 

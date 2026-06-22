@@ -136,8 +136,12 @@ const CsvMouvement = () => {
           item_id: links.itemtype,
           cost: Number(valiny) || 0,
           ticket_id: realGlpiId,
-          gp
+          gp,
+          mode: modeUsed,
+          pourcentage: supercost
         };
+
+        console.log('[CSV DEBUG] costPrix payload:', JSON.stringify(editingStatus));
 
         await apiLocalStatus('costPrix', {
           method: 'POST',

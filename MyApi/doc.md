@@ -122,3 +122,4 @@ Payload attendu (JSON) : couleur, name_fr, name_en, name_mg (les champs non rens
 Réponse : 200 OK
 
 source venv/bin/activate
+python3 app.py

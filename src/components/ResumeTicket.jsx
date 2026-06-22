@@ -148,16 +148,16 @@ const ResumeTicket = () => {
                   {item.category}
                 </td>
                 <td style={{ ...styles.tdCost, color: '#1A1D2E' }}>
-                  {item.glpiCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
+                  {item.glpiCost.toLocaleString('fr-FR', { minimumFractionDigits: 3 })} MGA
                 </td>
                 <td style={{ ...styles.tdCost, color: '#4338CA' }}>
-                  {item.superCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
+                  {item.superCost.toLocaleString('fr-FR', { minimumFractionDigits: 3 })} MGA
                 </td>
                 <td style={{ ...styles.tdCost, color: '#5A6178', textAlign: 'right' }}>
-                  {item.reouverture.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
+                  {item.reouverture.toLocaleString('fr-FR', { minimumFractionDigits: 3 })} MGA
                 </td>
                 <td style={{ ...styles.tdCost, fontWeight: '700', color: '#059669', backgroundColor: 'rgba(5, 150, 105, 0.04)' }}>
-                  {item.totalCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} MGA
+                  {item.totalCost.toLocaleString('fr-FR', { minimumFractionDigits: 3 })} MGA
                 </td>
               </tr>
             ))}

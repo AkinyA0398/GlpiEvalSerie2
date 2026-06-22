@@ -21,6 +21,80 @@ const GlpiItemList = () => {
   // Vérification de la session pour savoir s'il faut inclure le Layout admin
 
 
+  const loadAllData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const [docItems, statesRaw, manusRaw, ...itemsDataList] = await Promise.all([
+        fetchGlpiDocumentItems(),
+        apiGlpi('State?range=0-500'),
+        apiGlpi('Manufacturer?range=0-500'),
+        ...typesList.map(type => fetchGlpiItems(type))
+      ]);
+
+      const statusMap = {};
+      if (Array.isArray(statesRaw)) statesRaw.forEach(s => statusMap[s.id] = s.name);
+
+      const manuMap = {};
+      if (Array.isArray(manusRaw)) manusRaw.forEach(m => manuMap[m.id] = m.name);
+
+      let allItems = [];
+      const stats = new Set();
+      const manus = new Set();
+
+      typesList.forEach((type, index) => {
+        const data = itemsDataList[index];
+        if (Array.isArray(data)) {
+          data.forEach(item => {
+            const statusName = statusMap[item.states_id] || 'Inconnu';
+            const manufacturerName = manuMap[item.manufacturers_id] || 'Inconnu';
+            
+            stats.add(statusName);
+            manus.add(manufacturerName);
+
+            let linkedDoc = null;
+            if (Array.isArray(docItems)) {
+              linkedDoc = docItems.find(d => parseInt(d.items_id, 10) === parseInt(item.id, 10) && d.itemtype === type);
+            }
+
+            allItems.push({
+              ...item,
+              itemtype: type,
+              statusName,
+              manufacturerName,
+              inventoryNumber: item.otherserial || '',
+              serial: item.serial || '',
+              documentId: linkedDoc ? linkedDoc.documents_id : null
+            });
+          });
+        }
+      });
+
+      const imagePromises = allItems.map(async (item) => {
+        if (item.documentId) {
+          try {
+            item.imageUrl = await fetchGlpiDocumentImage(item.documentId);
+          } catch (e) {
+            item.imageUrl = null;
+          }
+        }
+        return item;
+      });
+
+      allItems = await Promise.all(imagePromises);
+
+      setStatusesList(Array.from(stats).filter(Boolean));
+      setManufacturersList(Array.from(manus).filter(Boolean));
+      setItems(allItems);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Erreur lors du chargement des données');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadAllData();
   }, []);

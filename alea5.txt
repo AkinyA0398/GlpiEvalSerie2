@@ -1,0 +1,14 @@
+- creer une page listreouverture : avec rafraichir
+    colonne : type (reouverture/ouverture), pourcentage, supercost, mode, modifier(popup)/supprimer
+- bouton mondifier reouverture : 
+    on peut modifier le supercost, les chiffres (pourcentage) et le mode
+    on peut supprimer une reouverture et un supercost (le clos reste) via le bouton supprimer 
+PS : recalcul automatique des valeurs en cas de modification 
+        (Rafraichissement automatique après modif/delete)
+        (les reouvertures modifier reste à leur place) 
+
+trois tableaux à afficher dans la page : 
+1. reouverture list (détails)
+2. supercost list (détails)
+3. total (recalculer if modified row/deleted row)
+
